@@ -9,7 +9,18 @@ endif()
 find_package(ament_cmake REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+
+add_executable(excavator_tf2_broadcaster src/excavator_tf2_broadcaster.cpp)
+ament_target_dependencies(excavator_tf2_broadcaster geometry_msgs sensor_msgs rclcpp tf2 tf2_ros)
+
+install(TARGETS
+  excavator_tf2_broadcaster
+  DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
