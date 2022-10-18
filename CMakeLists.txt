@@ -33,12 +33,14 @@ target_link_libraries(camera_reader ${realsense2_LIBRARY})
 add_executable(roi_node src/roi_node.cpp)
 ament_target_dependencies(roi_node rclcpp sensor_msgs std_msgs cv_bridge)
 
+add_executable(surface_reconstructor src/surface_reconstructor.cpp)
+ament_target_dependencies(surface_reconstructor rclcpp std_msgs sensor_msgs GSL cv_bridge)
 
 install(TARGETS
   excavator_tf2_broadcaster
   camera_reader
   roi_node
-  #  surface_reconstructor
+  surface_reconstructor
   DESTINATION lib/${PROJECT_NAME})
 
 # install the launch directory
