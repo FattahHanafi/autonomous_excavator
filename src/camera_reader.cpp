@@ -15,7 +15,7 @@ using std::placeholders::_1;
 
 class DepthImagePublisher : public rclcpp::Node {
   public:
-    explicit DepthImagePublisher() : Node("depth_image_publisher")
+    explicit DepthImagePublisher() : Node("camera_reader")
     {
         raw_depth_imgae_publisher = this->create_publisher<sensor_msgs::msg::Image>("camera/raw_depth_image", 10);
         filtered_depth_imgae_publisher = this->create_publisher<sensor_msgs::msg::Image>("camera/filtered_depth_image", 10);

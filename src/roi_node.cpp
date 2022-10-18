@@ -2,8 +2,6 @@
 
 #include <opencv2/core/core.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include <rclcpp/subscription.hpp>
-#include <sensor_msgs/msg/detail/image__struct.hpp>
 
 #include "sensor_msgs/image_encodings.hpp"
 #include "sensor_msgs/msg/image.hpp"
@@ -13,7 +11,7 @@ using std::placeholders::_1;
 
 class RegionOfInterestNode : public rclcpp::Node {
   public:
-    explicit RegionOfInterestNode() : Node("depth_image_publisher")
+    explicit RegionOfInterestNode() : Node("roi_node")
     {
         roi_subscriber =
             this->create_subscription<sensor_msgs::msg::RegionOfInterest>("camera/roi", 10, std::bind(&RegionOfInterestNode::roi_callback, this, _1));
@@ -38,13 +36,14 @@ class RegionOfInterestNode : public rclcpp::Node {
     void raw_depth_image_callback(const sensor_msgs::msg::Image::SharedPtr msg)
     {
         if (!roi.width || !roi.height) {
-            cropped_raw_depth_imgae_publisher->publish(*msg);
+            // cropped_raw_depth_imgae_publisher->publish(*msg);
             return;
         }
 
         cv_bridge::CvImagePtr cv_ptr;
         cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::TYPE_16UC1);
-        cv::Mat roi_depth_data = cv_ptr->image(cv::Range(roi.x_offset, roi.x_offset + roi.width), cv::Range(roi.y_offset, roi.y_offset + roi.height));
+        cv::Mat roi_depth_data =
+            cv_ptr->image(cv::Range(roi.y_offset, roi.y_offset + roi.height), cv::Range(roi.x_offset, roi.x_offset + roi.width));
 
         header.stamp = this->get_clock().get()->now();
 
@@ -55,13 +54,14 @@ class RegionOfInterestNode : public rclcpp::Node {
     void filtered_depth_image_callback(const sensor_msgs::msg::Image::SharedPtr msg)
     {
         if (!roi.width || !roi.height) {
-            cropped_filtered_depth_imgae_publisher->publish(*msg);
+            // cropped_filtered_depth_imgae_publisher->publish(*msg);
             return;
         }
 
         cv_bridge::CvImagePtr cv_ptr;
         cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::TYPE_16UC1);
-        cv::Mat roi_depth_data = cv_ptr->image(cv::Range(roi.x_offset, roi.x_offset + roi.width), cv::Range(roi.y_offset, roi.y_offset + roi.height));
+        cv::Mat roi_depth_data =
+            cv_ptr->image(cv::Range(roi.y_offset, roi.y_offset + roi.height), cv::Range(roi.x_offset, roi.x_offset + roi.width));
 
         header.stamp = this->get_clock().get()->now();
 
