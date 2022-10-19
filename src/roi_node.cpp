@@ -25,6 +25,7 @@ class RegionOfInterestNode : public rclcpp::Node {
         cropped_filtered_depth_imgae_publisher = this->create_publisher<sensor_msgs::msg::Image>("camera/cropped_filtered_depth_image", 10);
 
         header.frame_id = "camera_depth_optical_frame";
+		std::cout << "Hello\n";
     }
 
   private:
@@ -35,15 +36,11 @@ class RegionOfInterestNode : public rclcpp::Node {
 
     void raw_depth_image_callback(const sensor_msgs::msg::Image::SharedPtr msg)
     {
-        if (!roi.width || !roi.height) {
-            // cropped_raw_depth_imgae_publisher->publish(*msg);
-            return;
-        }
+        if (!roi.width || !roi.height) return;
 
         cv_bridge::CvImagePtr cv_ptr;
         cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::TYPE_16UC1);
-        cv::Mat roi_depth_data =
-            cv_ptr->image(cv::Range(roi.y_offset, roi.y_offset + roi.height), cv::Range(roi.x_offset, roi.x_offset + roi.width));
+        cv::Mat roi_depth_data = cv_ptr->image(cv::Range(roi.y_offset, roi.y_offset + roi.height), cv::Range(roi.x_offset, roi.x_offset + roi.width));
 
         header.stamp = this->get_clock().get()->now();
 
@@ -53,15 +50,11 @@ class RegionOfInterestNode : public rclcpp::Node {
 
     void filtered_depth_image_callback(const sensor_msgs::msg::Image::SharedPtr msg)
     {
-        if (!roi.width || !roi.height) {
-            // cropped_filtered_depth_imgae_publisher->publish(*msg);
-            return;
-        }
+        if (!roi.width || !roi.height) return;
 
         cv_bridge::CvImagePtr cv_ptr;
         cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::TYPE_16UC1);
-        cv::Mat roi_depth_data =
-            cv_ptr->image(cv::Range(roi.y_offset, roi.y_offset + roi.height), cv::Range(roi.x_offset, roi.x_offset + roi.width));
+        cv::Mat roi_depth_data = cv_ptr->image(cv::Range(roi.y_offset, roi.y_offset + roi.height), cv::Range(roi.x_offset, roi.x_offset + roi.width));
 
         header.stamp = this->get_clock().get()->now();
 
