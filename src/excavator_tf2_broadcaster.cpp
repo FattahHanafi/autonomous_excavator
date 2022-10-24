@@ -14,7 +14,7 @@ class FramePublisher : public rclcpp::Node
 public:
     explicit FramePublisher() : Node("excavator_tf2_broadcaster")
     {
-        joint_subscription_ = this->create_subscription<sensor_msgs::msg::JointState>("excavator/joints", 10, std::bind(&FramePublisher::make_transforms, this, _1));
+        joint_subscription_ = this->create_subscription<sensor_msgs::msg::JointState>("Machine/JointState", 10, std::bind(&FramePublisher::make_transforms, this, _1));
         tf_publisher_ = std::make_shared<tf2_ros::StaticTransformBroadcaster>(this);
     }
 

@@ -25,7 +25,10 @@ find_package(cv_bridge REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(GSL REQUIRED)
 
-include_directories(include ${realsense_INCLUDE_DIR})
+include_directories(include include/)
+
+add_executable(joint_publisher src/joint_publisher.cpp)
+ament_target_dependencies(joint_publisher rclcpp sensor_msgs)
 
 add_executable(excavator_tf2_broadcaster src/excavator_tf2_broadcaster.cpp)
 ament_target_dependencies(excavator_tf2_broadcaster rclcpp geometry_msgs sensor_msgs tf2 tf2_ros)
@@ -52,6 +55,7 @@ target_include_directories(merged PRIVATE ${realsense_INCLUDE_DIR})
 target_link_libraries(merged ${realsense2_LIBRARY})
 
 install(TARGETS
+  joint_publisher
   excavator_tf2_broadcaster
   camera_reader
   roi_node
