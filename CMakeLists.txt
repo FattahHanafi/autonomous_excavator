@@ -46,10 +46,10 @@ ament_target_dependencies(depth_to_point_cloud rclcpp std_msgs sensor_msgs reals
 target_include_directories(depth_to_point_cloud PRIVATE ${realsense_INCLUDE_DIR})
 target_link_libraries(depth_to_point_cloud ${realsense2_LIBRARY})
 
-# add_executable(merged src/merged.cpp)
-# ament_target_dependencies(merged rclcpp sensor_msgs realsense2 cv_bridge GSL cv_bridge)
-# target_include_directories(merged PRIVATE ${realsense_INCLUDE_DIR})
-# target_link_libraries(merged ${realsense2_LIBRARY})
+add_executable(merged src/merged.cpp)
+ament_target_dependencies(merged rclcpp sensor_msgs realsense2 cv_bridge GSL cv_bridge)
+target_include_directories(merged PRIVATE ${realsense_INCLUDE_DIR})
+target_link_libraries(merged ${realsense2_LIBRARY})
 
 install(TARGETS
   excavator_tf2_broadcaster
@@ -57,7 +57,7 @@ install(TARGETS
   roi_node
   surface_reconstructor
   depth_to_point_cloud
-  # merged
+  merged
   DESTINATION lib/${PROJECT_NAME})
 
 # install the launch directory
