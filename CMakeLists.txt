@@ -25,12 +25,13 @@ find_package(cv_bridge REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(GSL REQUIRED)
 
+include_directories(include ${realsense_INCLUDE_DIR})
+
 add_executable(excavator_tf2_broadcaster src/excavator_tf2_broadcaster.cpp)
 ament_target_dependencies(excavator_tf2_broadcaster rclcpp geometry_msgs sensor_msgs tf2 tf2_ros)
 
 add_executable(camera_reader src/camera_reader.cpp)
 ament_target_dependencies(camera_reader rclcpp sensor_msgs realsense2 cv_bridge GSL)
-include_directories(include ${realsense_INCLUDE_DIR})
 target_include_directories(camera_reader PRIVATE ${realsense_INCLUDE_DIR})
 target_link_libraries(camera_reader ${realsense2_LIBRARY})
 
@@ -40,11 +41,23 @@ ament_target_dependencies(roi_node rclcpp sensor_msgs std_msgs cv_bridge)
 add_executable(surface_reconstructor src/surface_reconstructor.cpp)
 ament_target_dependencies(surface_reconstructor rclcpp std_msgs sensor_msgs GSL cv_bridge)
 
+add_executable(depth_to_point_cloud src/depth_image_to_point_cloud.cpp)
+ament_target_dependencies(depth_to_point_cloud rclcpp std_msgs sensor_msgs realsense2)
+target_include_directories(depth_to_point_cloud PRIVATE ${realsense_INCLUDE_DIR})
+target_link_libraries(depth_to_point_cloud ${realsense2_LIBRARY})
+
+# add_executable(merged src/merged.cpp)
+# ament_target_dependencies(merged rclcpp sensor_msgs realsense2 cv_bridge GSL cv_bridge)
+# target_include_directories(merged PRIVATE ${realsense_INCLUDE_DIR})
+# target_link_libraries(merged ${realsense2_LIBRARY})
+
 install(TARGETS
   excavator_tf2_broadcaster
   camera_reader
   roi_node
   surface_reconstructor
+  depth_to_point_cloud
+  # merged
   DESTINATION lib/${PROJECT_NAME})
 
 # install the launch directory

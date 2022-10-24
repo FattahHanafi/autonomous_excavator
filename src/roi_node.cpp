@@ -1,13 +1,14 @@
 #include <cv_bridge/cv_bridge.h>
 
 #include <opencv2/core/core.hpp>
-#include <rclcpp/rclcpp.hpp>
+#include "rclcpp/rclcpp.hpp"
 
-#include "sensor_msgs/image_encodings.hpp"
 #include "sensor_msgs/msg/image.hpp"
 #include "sensor_msgs/msg/region_of_interest.hpp"
 
 using std::placeholders::_1;
+
+sensor_msgs::msg::RegionOfInterest roi;
 
 class RegionOfInterestNode : public rclcpp::Node {
   public:
@@ -25,11 +26,10 @@ class RegionOfInterestNode : public rclcpp::Node {
         cropped_filtered_depth_imgae_publisher = this->create_publisher<sensor_msgs::msg::Image>("camera/cropped_filtered_depth_image", 10);
 
         header.frame_id = "camera_depth_optical_frame";
-		std::cout << "Hello\n";
     }
 
   private:
-    sensor_msgs::msg::RegionOfInterest roi;
+
     std_msgs::msg::Header header = std_msgs::msg::Header();
     sensor_msgs::msg::Image::SharedPtr cropped_raw_depth_image_message;
     sensor_msgs::msg::Image::SharedPtr cropped_filtered_depth_image_message;

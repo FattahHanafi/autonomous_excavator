@@ -3,15 +3,11 @@
 #include <chrono>
 #include <librealsense2/rs.hpp>
 #include <memory>
-#include <rclcpp/logging.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/detail/header__struct.hpp>
-#include <variant>
 
 #include "sensor_msgs/msg/image.hpp"
 #include "std_msgs/msg/header.hpp"
 
-using std::placeholders::_1;
 using namespace std::chrono_literals;
 
 class DepthImagePublisher : public rclcpp::Node {
@@ -24,18 +20,18 @@ class DepthImagePublisher : public rclcpp::Node {
         this->declare_parameter("decimation_filter", false);
         this->declare_parameter("decimation_magnitude", 2);
 
-		this->declare_parameter("spatial_filter", false);
+        this->declare_parameter("spatial_filter", false);
         this->declare_parameter("spatial_magnitude", 2);
         this->declare_parameter("spatial_smooth_alpha", 0.5f);
         this->declare_parameter("spatial_smooth_delta", 20);
         // this->declare_parameter("spatial_hole_filling", 0);
-        
-		this->declare_parameter("temporial_filter", false);
+
+        this->declare_parameter("temporial_filter", false);
         this->declare_parameter("temporial_smooth_alpha", 0.4f);
         this->declare_parameter("temporial_smooth_delta", 20);
         // this->declare_parameter("temporial_persistency_index", 3);
-        
-		this->declare_parameter("hole_filling_filter", false);
+
+        this->declare_parameter("hole_filling_filter", false);
         this->declare_parameter("hole_filling", 1);
 
         this->declare_parameter("threshold_filter", false);
@@ -48,7 +44,7 @@ class DepthImagePublisher : public rclcpp::Node {
 
         pipe.start();
 
-        timer_ = this->create_wall_timer(100ms, std::bind(&DepthImagePublisher::captureImage, this));
+        timer_ = this->create_wall_timer(1000ms, std::bind(&DepthImagePublisher::captureImage, this));
     }
 
   private:
@@ -72,7 +68,7 @@ class DepthImagePublisher : public rclcpp::Node {
         auto depth_frame = frameset.get_depth_frame();
         auto color_frame = frameset.get_color_frame();
 
-        cv::Mat depth_data(cv::Size(depth_frame.get_width(), depth_frame.get_height()), CV_16U, (void*)depth_frame.get_data(), cv::Mat::AUTO_STEP);
+        cv::Mat depth_data(cv::Size(depth_frame.get_width(), depth_frame.get_height()), CV_16U, (void *)depth_frame.get_data(), cv::Mat::AUTO_STEP);
 
         header.stamp = this->get_clock().get()->now();
         depth_image_message = cv_bridge::CvImage(header, sensor_msgs::image_encodings::TYPE_16UC1, depth_data).toImageMsg();
@@ -93,7 +89,8 @@ class DepthImagePublisher : public rclcpp::Node {
         int spa_smd = this->get_parameter("spatial_smooth_delta").get_parameter_value().get<int>();
         spa_smd = (spa_smd > 50) ? 50 : spa_smd;
         spa_smd = (spa_smd < 1) ? 1 : spa_smd;
-        // int spa_hlf = this->get_parameter("spatial_hole_filling").get_parameter_value().get<int>();
+        // int spa_hlf =
+        // this->get_parameter("spatial_hole_filling").get_parameter_value().get<int>();
         // spa_hlf = (spa_hlf > 5) ? 5 : spa_hlf;
         // spa_hlf = (spa_hlf < 0) ? 0 : spa_hlf;
         spa_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, spa_mag);
@@ -106,13 +103,15 @@ class DepthImagePublisher : public rclcpp::Node {
         int tmp_smd = this->get_parameter("temporial_smooth_delta").get_parameter_value().get<int>();
         tmp_smd = (tmp_smd > 20) ? 20 : tmp_smd;
         tmp_smd = (tmp_smd < 1) ? 1 : tmp_smd;
-        // int tmp_psi = this->get_parameter("temporial_persistency_index").get_parameter_value().get<int>();
+        // int tmp_psi =
+        // this->get_parameter("temporial_persistency_index").get_parameter_value().get<int>();
         // tmp_psi = (tmp_psi > 20) ? 20 : tmp_psi;
         // tmp_psi = (tmp_psi < 1) ? 1 : tmp_psi;
         tmp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, tmp_sma);
         tmp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, tmp_smd);
 
-        /* int hlf_hlf = this->get_parameter("hole_filling").get_parameter_value().get<int>();
+        /* int hlf_hlf =
+        this->get_parameter("hole_filling").get_parameter_value().get<int>();
                 hlf_filer.supports
         hlf_hlf = (hlf_hlf > 2) ? 2 : hlf_hlf;
         hlf_hlf = (hlf_hlf < 0) ? 0 : hlf_hlf;
@@ -130,12 +129,14 @@ class DepthImagePublisher : public rclcpp::Node {
         if (this->get_parameter("decimation_filter").get_parameter_value().get<bool>()) filters.push_back(dec_filter);
         if (this->get_parameter("spatial_filter").get_parameter_value().get<bool>()) filters.push_back(spa_filter);
         if (this->get_parameter("temporial_filter").get_parameter_value().get<bool>()) filters.push_back(tmp_filter);
-        // if (this->get_parameter("hole_filling_filter").get_parameter_value().get<bool>()) filters.push_back(hlf_filter);
+        // if
+        // (this->get_parameter("hole_filling_filter").get_parameter_value().get<bool>())
+        // filters.push_back(hlf_filter);
         if (this->get_parameter("threshold_filter").get_parameter_value().get<bool>()) filters.push_back(trh_filter);
 
         for (auto filter : filters) depth_frame = depth_frame.apply_filter(filter);
 
-        cv::Mat filtered_depth_data(cv::Size(depth_frame.get_width(), depth_frame.get_height()), CV_16U, (void*)depth_frame.get_data(),
+        cv::Mat filtered_depth_data(cv::Size(depth_frame.get_width(), depth_frame.get_height()), CV_16U, (void *)depth_frame.get_data(),
                                     cv::Mat::AUTO_STEP);
 
         filtered_depth_image_message = cv_bridge::CvImage(header, sensor_msgs::image_encodings::TYPE_16UC1, filtered_depth_data).toImageMsg();
@@ -148,7 +149,7 @@ class DepthImagePublisher : public rclcpp::Node {
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr filtered_depth_image_publisher;
 };
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);
     rclcpp::spin(std::make_shared<DepthImagePublisher>());
