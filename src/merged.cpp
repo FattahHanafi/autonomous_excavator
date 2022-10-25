@@ -11,8 +11,8 @@
 #include <chrono>
 #include <librealsense2/rs.hpp>
 #include <memory>
-#include "rclcpp/rclcpp.hpp"
 
+#include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
 #include "sensor_msgs/msg/region_of_interest.hpp"
@@ -45,7 +45,15 @@ class DepthImagePublisher : public rclcpp::Node {
         reconstructed_cropped_filtered_depth_image_publisher =
             this->create_publisher<sensor_msgs::msg::Image>("camera/reconstructed_cropped_filtered_depth_image", 10);
 
-        point_cloud_publisher = this->create_publisher<sensor_msgs::msg::PointCloud2>("camera/point_cloud", 10);
+        // point_cloud_publisher = this->create_publisher<sensor_msgs::msg::PointCloud2>("camera/point_cloud", 10);
+        //  auto qos = rclcpp::SensorDataQoS();
+        //  qos.best_effort().keep_last(5).durability_volatile().reliability(rclcpp::ReliabilityPolicy::Reliable);
+
+        rmw_qos_profile_t qos_profile = rmw_qos_profile_system_default;
+
+        auto qos = rclcpp::QoS(rclcpp::QoSInitialization(qos_profile.history, qos_profile.depth), qos_profile);
+
+        point_cloud_publisher = this->create_publisher<sensor_msgs::msg::PointCloud2>("camera/point_cloud", qos);
 
         this->declare_parameter("decimation_filter", false);
         this->declare_parameter("decimation_magnitude", 2);
@@ -70,7 +78,26 @@ class DepthImagePublisher : public rclcpp::Node {
 
         filters.reserve(4);
 
-        header.frame_id = "camera_depth_optical_frame";
+        header.frame_id = "camera";
+
+		sensor_msgs::msg::PointField p_x, p_y, p_z;
+		p_x.name = "x";
+		p_x.datatype = sensor_msgs::msg::PointField::FLOAT32;
+		p_x.offset = 0;
+		p_x.count = 1;
+
+		p_y.name = "y";
+		p_y.datatype = sensor_msgs::msg::PointField::FLOAT32;
+		p_y.offset = 4;
+		p_y.count = 1;
+
+		p_z.name = "z";
+		p_z.datatype = sensor_msgs::msg::PointField::FLOAT32;
+		p_z.offset = 8;
+		p_z.count = 1;
+		point_cloud_message.fields.push_back(p_x);
+		point_cloud_message.fields.push_back(p_y);
+		point_cloud_message.fields.push_back(p_z);
 
         pipe.start();
 
@@ -84,7 +111,7 @@ class DepthImagePublisher : public rclcpp::Node {
     sensor_msgs::msg::Image::SharedPtr cropped_filtered_depth_image_message;
     sensor_msgs::msg::Image::SharedPtr reconstructed_cropped_filtered_depth_image_message;
 
-    sensor_msgs::msg::PointCloud2::SharedPtr point_cloud_message;
+    sensor_msgs::msg::PointCloud2 point_cloud_message;
 
     std_msgs::msg::Header header;
     rs2::pipeline pipe;
@@ -260,25 +287,29 @@ class DepthImagePublisher : public rclcpp::Node {
 
         auto points = point_cloud.calculate(depth_frame);
 
-        points.export_to_ply("data.ply", color_frame);
+        // points.export_to_ply("data.ply", color_frame);
 
-        /* point_cloud_message->header = header;
-        point_cloud_message->height = depth_frame.get_height();
-        point_cloud_message->width = depth_frame.get_width();
-        point_cloud_message->point_step = sizeof(rs2::vertex);
-        point_cloud_message->row_step = depth_frame.get_width() * point_cloud_message->point_step;
-        point_cloud_message->is_dense = true;
-        point_cloud_message->data.resize(point_cloud_message->width * point_cloud_message->row_step);
+        point_cloud_message.header = header;
+        point_cloud_message.height = depth_frame.get_height();
+        point_cloud_message.width = depth_frame.get_width();
+        point_cloud_message.point_step = sizeof(rs2::vertex);
+        point_cloud_message.row_step = depth_frame.get_width() * point_cloud_message.point_step;
+        point_cloud_message.is_dense = true;
+        point_cloud_message.data.resize(point_cloud_message.height * point_cloud_message.row_step);
 
-        uint8_t* vertex_ptr = (uint8_t*) points.get_vertices();
+        // point_cloud_message.data.clear();
+        // point_cloud_message.data.reserve(points.size() * sizeof(rs2::vertex));
 
-        for(uint32_t i = 0; i < point_cloud_message->data.size(); ++i)
-        {
-            point_cloud_message->data[i] = vertex_ptr[i];
+		auto pc_ptr = (uint8_t*) points.get_vertices();
+        int i;
+        for (i = 0; i < points.get_data_size(); ++i) {
+			point_cloud_message.data[i] = pc_ptr[i];
         }
 
-        point_cloud_publisher->publish(*point_cloud_message);
- */
+		point_cloud_message.header.frame_id = "world";
+
+        RCLCPP_INFO(this->get_logger(), "Total points = %u published.", i);
+        point_cloud_publisher->publish(point_cloud_message);
     }
 
     void roi_callback(const sensor_msgs::msg::RegionOfInterest::SharedPtr msg)
