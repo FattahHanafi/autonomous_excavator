@@ -25,7 +25,7 @@ class RegionOfInterestNode : public rclcpp::Node {
             "camera/filtered_depth_image", 10, std::bind(&RegionOfInterestNode::filtered_depth_image_callback, this, _1));
         cropped_filtered_depth_imgae_publisher = this->create_publisher<sensor_msgs::msg::Image>("camera/cropped_filtered_depth_image", 10);
 
-        header.frame_id = "camera_depth_optical_frame";
+        header.frame_id = "camera";
     }
 
   private:

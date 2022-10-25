@@ -15,9 +15,9 @@ class JointPiblisher : public rclcpp::Node {
         joint_message.effort.resize(4, 0.0f);
 
         joint_message.name[0] = "Swing";
-        joint_message.name[0] = "Boom";
-        joint_message.name[0] = "Arm";
-        joint_message.name[0] = "Bucket";
+        joint_message.name[1] = "Boom";
+        joint_message.name[2] = "Arm";
+        joint_message.name[3] = "Bucket";
     }
 
   private:

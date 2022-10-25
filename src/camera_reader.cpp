@@ -40,7 +40,7 @@ class DepthImagePublisher : public rclcpp::Node {
 
         filters.reserve(4);
 
-        header.frame_id = "camera_depth_optical_frame";
+        header.frame_id = "camera";
 
         pipe.start();
 

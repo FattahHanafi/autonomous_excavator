@@ -33,6 +33,9 @@ ament_target_dependencies(joint_publisher rclcpp sensor_msgs)
 add_executable(excavator_tf2_broadcaster src/excavator_tf2_broadcaster.cpp)
 ament_target_dependencies(excavator_tf2_broadcaster rclcpp geometry_msgs sensor_msgs tf2 tf2_ros)
 
+add_executable(blade_node src/blade_node.cpp)
+ament_target_dependencies(blade_node rclcpp geometry_msgs)
+
 add_executable(camera_reader src/camera_reader.cpp)
 ament_target_dependencies(camera_reader rclcpp sensor_msgs realsense2 cv_bridge GSL)
 target_include_directories(camera_reader PRIVATE ${realsense_INCLUDE_DIR})
@@ -57,6 +60,7 @@ target_link_libraries(merged ${realsense2_LIBRARY})
 install(TARGETS
   joint_publisher
   excavator_tf2_broadcaster
+  blade_node
   camera_reader
   roi_node
   surface_reconstructor

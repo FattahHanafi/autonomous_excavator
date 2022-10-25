@@ -14,8 +14,8 @@ class FramePublisher : public rclcpp::Node
 public:
     explicit FramePublisher() : Node("excavator_tf2_broadcaster")
     {
-        joint_subscription_ = this->create_subscription<sensor_msgs::msg::JointState>("Machine/JointState", 10, std::bind(&FramePublisher::make_transforms, this, _1));
-        tf_publisher_ = std::make_shared<tf2_ros::StaticTransformBroadcaster>(this);
+        joint_subscription = this->create_subscription<sensor_msgs::msg::JointState>("Machine/JointState", 10, std::bind(&FramePublisher::make_transforms, this, _1));
+        tf_publisher = std::make_shared<tf2_ros::StaticTransformBroadcaster>(this);
     }
 
 private:
@@ -39,7 +39,7 @@ private:
         t.transform.rotation.z = q.z();
         t.transform.rotation.w = q.w();
 
-        tf_publisher_->sendTransform(t);
+        tf_publisher->sendTransform(t);
 
         t.header.frame_id = "base";
         t.child_frame_id = "swing";
@@ -53,7 +53,7 @@ private:
         t.transform.rotation.z = joint.z();
         t.transform.rotation.w = joint.w();
 
-        tf_publisher_->sendTransform(t);
+        tf_publisher->sendTransform(t);
 
         t.header.frame_id = "swing";
         t.child_frame_id = "boom";
@@ -66,7 +66,7 @@ private:
         t.transform.rotation.z = joint.z();
         t.transform.rotation.w = joint.w();
 
-        tf_publisher_->sendTransform(t);
+        tf_publisher->sendTransform(t);
 
         t.header.frame_id = "boom";
         t.child_frame_id = "arm";
@@ -78,8 +78,18 @@ private:
         t.transform.rotation.y = joint.y();
         t.transform.rotation.z = joint.z();
         t.transform.rotation.w = joint.w();
+        
+		tf_publisher->sendTransform(t);
 
-        tf_publisher_->sendTransform(t);
+		t.child_frame_id = "camera";
+		t.transform.translation.x = 0.5;
+		t.transform.translation.y = 0.0;
+		t.transform.translation.z = 0.0;
+		t.transform.rotation.x = 0.0;
+		t.transform.rotation.y = 0.0;
+		t.transform.rotation.z = 0.0;
+		tf_publisher->sendTransform(t);
+
 
         t.header.frame_id = "arm";
         t.child_frame_id = "bucket";
@@ -92,7 +102,7 @@ private:
         t.transform.rotation.z = joint.z();
         t.transform.rotation.w = joint.w();
 
-        tf_publisher_->sendTransform(t);
+        tf_publisher->sendTransform(t);
 
         t.header.frame_id = "bucket";
         t.child_frame_id = "teeth";
@@ -105,11 +115,11 @@ private:
         t.transform.rotation.z = joint.z();
         t.transform.rotation.w = joint.w();
 
-        tf_publisher_->sendTransform(t);
+        tf_publisher->sendTransform(t);
     }
 
-    rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_subscription_;
-    std::shared_ptr<tf2_ros::StaticTransformBroadcaster> tf_publisher_;
+    rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_subscription;
+    std::shared_ptr<tf2_ros::StaticTransformBroadcaster> tf_publisher;
 };
 
 int main(int argc, char *argv[])
