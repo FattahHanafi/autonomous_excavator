@@ -1,24 +1,27 @@
-#include <rclcpp/rclcpp.hpp>
-
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/static_transform_broadcaster.h>
+
 #include <geometry_msgs/msg/transform_stamped.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
+
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 #include <memory>
 
 using std::placeholders::_1;
 
-class FramePublisher : public rclcpp::Node
-{
-public:
+class FramePublisher : public rclcpp::Node {
+  public:
     explicit FramePublisher() : Node("excavator_tf2_broadcaster")
     {
-        joint_subscription = this->create_subscription<sensor_msgs::msg::JointState>("Machine/JointState", 10, std::bind(&FramePublisher::make_transforms, this, _1));
+        joint_subscription =
+            this->create_subscription<sensor_msgs::msg::JointState>("Machine/JointState", 10, std::bind(&FramePublisher::make_transforms, this, _1));
         tf_publisher = std::make_shared<tf2_ros::StaticTransformBroadcaster>(this);
     }
 
-private:
+  private:
     void make_transforms(sensor_msgs::msg::JointState::SharedPtr msg)
     {
         rclcpp::Time now = this->get_clock()->now();
@@ -78,18 +81,19 @@ private:
         t.transform.rotation.y = joint.y();
         t.transform.rotation.z = joint.z();
         t.transform.rotation.w = joint.w();
-        
-		tf_publisher->sendTransform(t);
 
-		t.child_frame_id = "camera";
-		t.transform.translation.x = 0.5;
-		t.transform.translation.y = 0.0;
-		t.transform.translation.z = 0.0;
-		t.transform.rotation.x = 0.0;
-		t.transform.rotation.y = 0.0;
-		t.transform.rotation.z = 0.0;
-		tf_publisher->sendTransform(t);
+        tf_publisher->sendTransform(t);
 
+        t.child_frame_id = "camera";
+        t.transform.translation.x = 0.5;
+        t.transform.translation.y = 0.0;
+        t.transform.translation.z = 0.0;
+        joint.setRPY(0, M_PI_2 + M_PI / 6.0f, 0);
+        t.transform.rotation.x = joint.x();
+        t.transform.rotation.y = joint.y();
+        t.transform.rotation.z = joint.z();
+        t.transform.rotation.w = joint.w();
+        tf_publisher->sendTransform(t);
 
         t.header.frame_id = "arm";
         t.child_frame_id = "bucket";

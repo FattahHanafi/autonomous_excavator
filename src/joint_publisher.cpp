@@ -7,7 +7,7 @@ class JointPiblisher : public rclcpp::Node {
   public:
     JointPiblisher() : Node("joint_publisher")
     {
-        joint_publisher = this->create_publisher<sensor_msgs::msg::JointState>("Machine/JointState", 10);
+        joint_publisher = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
         timer_ = this->create_wall_timer(10ms, std::bind(&JointPiblisher::timer_callback, this));
         joint_message.name.resize(4);
         joint_message.position.resize(4, 0.0f);

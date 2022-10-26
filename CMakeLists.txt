@@ -71,6 +71,7 @@ install(TARGETS
 # install the launch directory
 install(DIRECTORY
   launch
+  urdf
   DESTINATION share/${PROJECT_NAME}/
 )
 
