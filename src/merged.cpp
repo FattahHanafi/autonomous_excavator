@@ -289,7 +289,7 @@ class DepthImagePublisher : public rclcpp::Node {
 
         // points.export_to_ply("data.ply", color_frame);
 
-        point_cloud_message.header = header;
+        point_cloud_message.set__header(header);
         point_cloud_message.height = depth_frame.get_height();
         point_cloud_message.width = depth_frame.get_width();
         point_cloud_message.point_step = sizeof(rs2::vertex);
@@ -306,7 +306,7 @@ class DepthImagePublisher : public rclcpp::Node {
 			point_cloud_message.data[i] = pc_ptr[i];
         }
 
-		point_cloud_message.header.frame_id = "world";
+//		point_cloud_message.header.frame_id = "camera";
 
         RCLCPP_INFO(this->get_logger(), "Total points = %u published.", i);
         point_cloud_publisher->publish(point_cloud_message);

@@ -13,6 +13,10 @@
     <color rgba="1 1 0 1"/>
   </material>
 
+  <material name="grey">
+    <color rgba="0.66 0.66 0.66 1"/>
+  </material>
+
   <link name="world"/>
 
   <link name="base">
@@ -41,7 +45,28 @@
       <material name="yellow"/>
     </visual>
   </link>
-  
+
+
+  <link name="camera_bracket">
+    <visual>
+	  <geometry>
+	  	<mesh filename="package://autonomous_excavator/urdf/meshes/electrical/CameraBracket.STL" scale="0.001 0.001 0.001" />
+	  </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+
+
+  <link name="camera">
+    <visual>
+	  <geometry>
+		  <mesh filename="package://autonomous_excavator/urdf/meshes/electrical/D455.STL" scale="0.001 0.001 0.001" />
+	  </geometry>
+      <material name="grey"/>
+    </visual>
+  </link>
+
+
   <link name="arm">
     <visual>
 	  <geometry>
@@ -63,6 +88,20 @@
   <joint name="fix" type="fixed">
   	<parent link="world"/>
 	<child link="base"/>
+  </joint>
+
+
+  <joint name="camera_bracket_fix" type="fixed">
+	<origin xyz="0.3604 0.0495 0.1725" rpy="0 0 0" />
+  	<parent link="boom"/>
+	<child link="camera_bracket"/>
+  </joint>
+
+
+  <joint name="D455_fix" type="fixed">
+	  <origin xyz="0.1065 0.0275 -0.0622" rpy="0 2.6180 0" />
+  	<parent link="camera_bracket"/>
+	<child link="camera"/>
   </joint>
 
   <joint name="Swing" type="continuous">

@@ -24,10 +24,10 @@ class JointPiblisher : public rclcpp::Node {
     void timer_callback()
     {
         rclcpp::Time now = this->get_clock()->now();
-		joint_message.position[0] = 0.0f;
-        joint_message.position[1] = 0.2 * std::sin(1 * now.seconds());
-        joint_message.position[2] = 0.3 + 0.2 * std::sin(2 * now.seconds());
-        joint_message.position[3] = 0.5 + 0.2 * std::sin(2 * now.seconds());
+		joint_message.position[0] = 0.0;
+        joint_message.position[1] = 0.0 * 0.2 * std::sin(1 * now.seconds());
+        joint_message.position[2] = 0.0 * 0.3 + 0.2 * std::sin(2 * now.seconds());
+        joint_message.position[3] = 0.0 * 0.5 + 0.2 * std::sin(2 * now.seconds());
         joint_message.header.stamp = now;
         joint_publisher->publish(joint_message);
     }
