@@ -57,8 +57,12 @@ ament_target_dependencies(merged rclcpp sensor_msgs realsense2 cv_bridge GSL cv_
 target_include_directories(merged PRIVATE ${realsense_INCLUDE_DIR})
 target_link_libraries(merged ${realsense2_LIBRARY})
 
+add_executable(serial_interface src/serial_interface.cpp)
+ament_target_dependencies(serial_interface rclcpp sensor_msgs)
+
 install(TARGETS
   joint_publisher
+  stroke_publisher
   excavator_tf2_broadcaster
   blade_node
   camera_reader
@@ -66,6 +70,7 @@ install(TARGETS
   surface_reconstructor
   depth_to_point_cloud
   merged
+  serial_interface
   DESTINATION lib/${PROJECT_NAME})
 
 # install the launch directory
