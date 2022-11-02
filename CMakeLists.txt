@@ -30,6 +30,9 @@ include_directories(include include/)
 add_executable(joint_publisher src/joint_publisher.cpp)
 ament_target_dependencies(joint_publisher rclcpp sensor_msgs)
 
+add_executable(stroke_publisher src/stroke_publisher.cpp)
+ament_target_dependencies(stroke_publisher rclcpp sensor_msgs)
+
 add_executable(excavator_tf2_broadcaster src/excavator_tf2_broadcaster.cpp)
 ament_target_dependencies(excavator_tf2_broadcaster rclcpp geometry_msgs sensor_msgs tf2 tf2_ros)
 
@@ -57,8 +60,11 @@ ament_target_dependencies(merged rclcpp sensor_msgs realsense2 cv_bridge GSL cv_
 target_include_directories(merged PRIVATE ${realsense_INCLUDE_DIR})
 target_link_libraries(merged ${realsense2_LIBRARY})
 
-add_executable(serial_interface src/serial_interface.cpp)
-ament_target_dependencies(serial_interface rclcpp sensor_msgs)
+add_executable(serial_rx src/serial_rx.cpp)
+ament_target_dependencies(serial_rx rclcpp sensor_msgs)
+
+add_executable(serial_tx src/serial_tx.cpp)
+ament_target_dependencies(serial_tx rclcpp sensor_msgs)
 
 install(TARGETS
   joint_publisher
@@ -70,7 +76,8 @@ install(TARGETS
   surface_reconstructor
   depth_to_point_cloud
   merged
-  serial_interface
+  serial_rx
+  serial_tx
   DESTINATION lib/${PROJECT_NAME})
 
 # install the launch directory

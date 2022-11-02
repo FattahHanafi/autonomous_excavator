@@ -3,44 +3,43 @@
 
 using namespace std::chrono_literals;
 
-class JointPiblisher : public rclcpp::Node {
+class StrokePiblisher : public rclcpp::Node {
   public:
-    JointPiblisher() : Node("joint_publisher")
+    StrokePiblisher() : Node("joint_angle_publisher")
     {
-        joint_publisher = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
-        timer_ = this->create_wall_timer(10ms, std::bind(&JointPiblisher::timer_callback, this));
-        joint_message.name.resize(4);
-        joint_message.position.resize(4, 0.0f);
-        joint_message.velocity.resize(4, 0.0f);
-        joint_message.effort.resize(4, 0.0f);
+        joint_angle_publisher = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
+        timer_ = this->create_wall_timer(10ms, std::bind(&StrokePiblisher::timer_callback, this));
+        stroke_message.name.resize(4);
+        stroke_message.position.resize(4, 0.0f);
+        stroke_message.velocity.resize(4, 0.0f);
+        stroke_message.effort.resize(4, 0.0f);
 
-        joint_message.name[0] = "Swing";
-        joint_message.name[1] = "Boom";
-        joint_message.name[2] = "Arm";
-        joint_message.name[3] = "Bucket";
+        stroke_message.name[0] = "Swing";
+        stroke_message.name[1] = "Boom";
+        stroke_message.name[2] = "Arm";
+        stroke_message.name[3] = "Bucket";
     }
 
   private:
     void timer_callback()
     {
-        rclcpp::Time now = this->get_clock()->now();
-		joint_message.position[0] = 0.0;
-        joint_message.position[1] = 0.0 * 0.2 * std::sin(1 * now.seconds());
-        joint_message.position[2] = 0.0 * 0.3 + 0.2 * std::sin(2 * now.seconds());
-        joint_message.position[3] = 0.0 * 0.5 + 0.2 * std::sin(2 * now.seconds());
-        joint_message.header.stamp = now;
-        joint_publisher->publish(joint_message);
+		stroke_message.position[0] = 0.0;
+        stroke_message.position[1] = 0.0; // * 0.2 * std::sin(1 * now.seconds());
+        stroke_message.position[2] = 0.0; // * 0.3 + 0.2 * std::sin(2 * now.seconds());
+        stroke_message.position[3] = 0.0; // * 0.5 + 0.2 * std::sin(2 * now.seconds());
+        stroke_message.header.stamp = this->get_clock()->now();
+        joint_angle_publisher->publish(stroke_message);
     }
 
     rclcpp::TimerBase::SharedPtr timer_;
-    sensor_msgs::msg::JointState joint_message;
-    rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_publisher;
+    sensor_msgs::msg::JointState stroke_message;
+    rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_angle_publisher;
 };
 
 int main(int argc, char* argv[])
 {
     rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<JointPiblisher>());
+    rclcpp::spin(std::make_shared<StrokePiblisher>());
     rclcpp::shutdown();
     return 0;
 }
