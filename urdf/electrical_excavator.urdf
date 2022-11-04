@@ -90,9 +90,9 @@
 	<child link="base"/>
   </joint>
 
-
   <joint name="camera_bracket_fix" type="fixed">
-	<origin xyz="0.3604 0.0495 0.1725" rpy="0 0 0" />
+	<!-- <origin xyz="0.3604 0.0495 0.1725" rpy="0 0 0" /> -->
+	<origin xyz="0.3872 0.0495 0.0985" rpy="0 0.1974 0" />
   	<parent link="boom"/>
 	<child link="camera_bracket"/>
   </joint>
