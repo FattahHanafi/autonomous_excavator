@@ -104,9 +104,9 @@ class SerialRX : public rclcpp::Node {
         if ((comma_count == 7) && (feedback_buffer[0] != ',')) {
             sscanf(feedback_buffer, "%i,%f,%f,%f,%f,%f,%f,%f", &a, &feedback[0], &feedback[1], &feedback[2], &feedback[3], &feedback[4], &feedback[5],
                    &feedback[6]);
-            m_FeedbackMessage.position[0] = feedback[0];
-            m_FeedbackMessage.position[1] = feedback[1];
-            m_FeedbackMessage.position[2] = feedback[2];
+            m_FeedbackMessage.position[0] = feedback[2];
+            m_FeedbackMessage.position[1] = feedback[0];
+            m_FeedbackMessage.position[2] = feedback[1];
             m_FeedbackMessage.header.stamp = this->get_clock()->now();
             stroke_feedback_publisher->publish(m_FeedbackMessage);
         }

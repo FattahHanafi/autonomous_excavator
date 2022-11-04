@@ -116,10 +116,13 @@ class SerialTX : public rclcpp::Node {
             close(m_CommandFD);
             return;
         }
-
         uint32_t S1 = uint32_t(msg->position[0]);
         uint32_t S2 = uint32_t(msg->position[1]);
         uint32_t S3 = uint32_t(msg->position[2]);
+
+		// S1 = 420;
+		// S2 = 470;
+		// S3 = 500;
         /* S123=S2*1000000+S3*1000+S1;
         process='digging';
         data="<"+process+","+S123+","+S4+">"; */

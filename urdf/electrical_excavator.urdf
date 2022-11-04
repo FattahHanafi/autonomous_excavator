@@ -97,7 +97,6 @@
 	<child link="camera_bracket"/>
   </joint>
 
-
   <joint name="D455_fix" type="fixed">
 	  <origin xyz="0.1065 0.0275 -0.0622" rpy="0 2.6180 0" />
   	<parent link="camera_bracket"/>
@@ -120,7 +119,8 @@
 
   <joint name="Arm" type="continuous">
     <axis xyz="0.0 1.0 .0" />
-	<origin xyz="1.050 0 0.210" rpy="0 0 0" />
+	<!-- <origin xyz="1.050 0 0.210" rpy="0 0 0" /> -->
+	<origin xyz="1.071 0 0" rpy="0 0 0" />
     <parent link="boom"/>
     <child link="arm"/>
   </joint>
