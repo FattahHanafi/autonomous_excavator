@@ -8,24 +8,26 @@ class StrokePiblisher : public rclcpp::Node {
     StrokePiblisher() : Node("stroke_publisher")
     {
         joint_angle_publisher = this->create_publisher<sensor_msgs::msg::JointState>("Machine/ActuatorStroke/Command", 10);
-        timer_ = this->create_wall_timer(20ms, std::bind(&StrokePiblisher::timer_callback, this));
-        stroke_message.name.resize(3);
-        stroke_message.position.resize(3, 0.0f);
-        stroke_message.velocity.resize(3, 0.0f);
-        stroke_message.effort.resize(3, 0.0f);
+        timer_ = this->create_wall_timer(1ms, std::bind(&StrokePiblisher::timer_callback, this));
+        stroke_message.name.resize(4);
+        stroke_message.position.resize(4, 0.0f);
+        stroke_message.velocity.resize(4, 0.0f);
+        stroke_message.effort.resize(4, 0.0f);
 
-        stroke_message.name[0] = "S1";
-        stroke_message.name[1] = "S2";
-        stroke_message.name[2] = "S3";
+        stroke_message.name[0] = "S0";
+        stroke_message.name[1] = "S1";
+        stroke_message.name[2] = "S2";
+        stroke_message.name[3] = "S3";
     }
 
   private:
     void timer_callback()
     {
         auto now = this->get_clock()->now();
-        stroke_message.position[0] = 450.2;
-        stroke_message.position[1] = 450.2;  // * 0.2 * std::sin(1 * now.seconds());
-        stroke_message.position[2] = 470.2 + 30.0 * std::sin(2 * now.seconds());
+        stroke_message.position[0] = 0.0;
+        stroke_message.position[1] = 450.0;
+        stroke_message.position[2] = 450.0;  // * 0.2 * std::sin(1 * now.seconds());
+        stroke_message.position[3] = 470.0 + 30.0 * std::sin(2 * now.seconds());
         stroke_message.header.stamp = now;
         joint_angle_publisher->publish(stroke_message);
     }

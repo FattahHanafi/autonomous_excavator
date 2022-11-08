@@ -51,7 +51,7 @@ class SerialTX : public rclcpp::Node {
             if (std::regex_search(line, ard_match, ard_regex)) {
                 std::regex_search(line, ser_match, ser_regex);
                 std::regex_search(line, acm_match, acm_regex);
-                if (ser_match.str() == "85935333637351C0E121") m_CommandSerialPort += acm_match.str();
+                if (ser_match.str() == "75130303236351612250") m_CommandSerialPort += acm_match.str();
             }
         }
 
@@ -71,27 +71,27 @@ class SerialTX : public rclcpp::Node {
         }
 
         tcgetattr(m_CommandFD, &m_CommandConfig);
-		cfmakeraw(&m_CommandConfig);
+        cfmakeraw(&m_CommandConfig);
         cfsetospeed(&m_CommandConfig, B115200);
-		cfsetispeed(&m_CommandConfig, B115200);
-		m_CommandConfig.c_cflag = (m_CommandConfig.c_cflag & ~CSIZE) | CS8;
-		m_CommandConfig.c_iflag &= ~IGNBRK;  // disable break processing
-		m_CommandConfig.c_lflag = 0;         // no signaling chars, no echo, no canonical processing
-		m_CommandConfig.c_oflag = 0;         // no remapping, no delays
-		m_CommandConfig.c_cc[VMIN] = 0;      // read doesn't block
-		m_CommandConfig.c_cc[VTIME] = 5;     // 0.5 seconds read timeout
+        cfsetispeed(&m_CommandConfig, B115200);
+        m_CommandConfig.c_cflag = (m_CommandConfig.c_cflag & ~CSIZE) | CS8;
+        m_CommandConfig.c_iflag &= ~IGNBRK;  // disable break processing
+        m_CommandConfig.c_lflag = 0;         // no signaling chars, no echo, no canonical processing
+        m_CommandConfig.c_oflag = 0;         // no remapping, no delays
+        m_CommandConfig.c_cc[VMIN] = 0;      // read doesn't block
+        m_CommandConfig.c_cc[VTIME] = 5;     // 0.5 seconds read timeout
 
-		m_CommandConfig.c_iflag &= ~(IXON | IXOFF | IXANY);  // shut off xon/xoff ctrl
+        m_CommandConfig.c_iflag &= ~(IXON | IXOFF | IXANY);  // shut off xon/xoff ctrl
 
-		m_CommandConfig.c_cflag |= (CLOCAL | CREAD);    // ignore modem controls, enable reading
-		m_CommandConfig.c_cflag &= ~(PARENB | PARODD);  // shut off parity
-		m_CommandConfig.c_cflag |= 0;
-		m_CommandConfig.c_cflag &= ~CSTOPB;
-		m_CommandConfig.c_cflag &= ~CRTSCTS;
-//
-		m_CommandConfig.c_oflag &= ~(IXOFF | IXANY);
-//
-		cfsetospeed(&m_CommandConfig, B115200);
+        m_CommandConfig.c_cflag |= (CLOCAL | CREAD);    // ignore modem controls, enable reading
+        m_CommandConfig.c_cflag &= ~(PARENB | PARODD);  // shut off parity
+        m_CommandConfig.c_cflag |= 0;
+        m_CommandConfig.c_cflag &= ~CSTOPB;
+        m_CommandConfig.c_cflag &= ~CRTSCTS;
+        //
+        m_CommandConfig.c_oflag &= ~(IXOFF | IXANY);
+        //
+        cfsetospeed(&m_CommandConfig, B115200);
 
         tcsetattr(m_CommandFD, TCSANOW, &m_CommandConfig);
 
@@ -116,18 +116,8 @@ class SerialTX : public rclcpp::Node {
             close(m_CommandFD);
             return;
         }
-        uint32_t S1 = uint32_t(msg->position[0]);
-        uint32_t S2 = uint32_t(msg->position[1]);
-        uint32_t S3 = uint32_t(msg->position[2]);
-
-		// S1 = 420;
-		// S2 = 470;
-		// S3 = 500;
-        /* S123=S2*1000000+S3*1000+S1;
-        process='digging';
-        data="<"+process+","+S123+","+S4+">"; */
-
-        std::string stroke_command = "<dumping," + std::to_string(S2) + std::to_string(S3) + std::to_string(S1) + ",0>\n";
+        std::string stroke_command = std::to_string(msg->position[0]) + ' ' + std::to_string(msg->position[1]) + ' ' +
+                                     std::to_string(msg->position[2]) + ' ' + std::to_string(msg->position[3]) + " \n";
         write(m_CommandFD, stroke_command.c_str(), stroke_command.size());
     }
 

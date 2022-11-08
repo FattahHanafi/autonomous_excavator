@@ -49,9 +49,10 @@ class JointStatePiblisher : public rclcpp::Node {
   private:
     void StrokeFeedbackCallback(const sensor_msgs::msg::JointState::SharedPtr msg)
     {
-        const float S1 = msg->position[0];
-        const float S2 = msg->position[1];
-        const float S3 = msg->position[2];
+		const float S0 = msg->position[0];
+        const float S1 = msg->position[1];
+        const float S2 = msg->position[2];
+        const float S3 = msg->position[3];
 
         float theta2 = acos((L1 * L1 + L2 * L2 - S1 * S1) / (2 * L1 * L2));
         float q1 = M_PI - theta1 - theta2 - theta3;
@@ -84,7 +85,7 @@ class JointStatePiblisher : public rclcpp::Node {
         float EPZ = REP * sin(theta23);
         float Theta_end = q1 - q2 - q3;
 
-        joint_angle_message.position[0] = 0.0;
+        joint_angle_message.position[0] = S0;
         joint_angle_message.position[1] = -q1;// * -q1;
         joint_angle_message.position[2] = q2;// q2;  // * 0.3 + 0.2 * std::sin(2 * now.seconds());
         joint_angle_message.position[3] = q3;//  + theta19 - M_PI / 2.0 ;// q3;     // * 0.5 + 0.2 * std::sin(2 * now.seconds());

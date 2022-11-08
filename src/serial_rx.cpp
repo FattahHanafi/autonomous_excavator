@@ -74,39 +74,52 @@ class SerialRX : public rclcpp::Node {
 
         tcsetattr(m_FeedbackFD, TCSANOW, &m_FeedbackConfig);
 
+        char c;
+        do {
+            read(m_FeedbackFD, &c, sizeof(c));
+        } while (c != '\n');
+
         m_FeedbackMessage.header.frame_id = "world";
+        m_FeedbackMessage.name.push_back("S0");
         m_FeedbackMessage.name.push_back("S1");
         m_FeedbackMessage.name.push_back("S2");
         m_FeedbackMessage.name.push_back("S3");
 
-        m_FeedbackMessage.position.resize(3, 0.0f);
-        m_FeedbackMessage.velocity.resize(3, 0.0f);
-        m_FeedbackMessage.effort.resize(3, 0.0f);
+        m_FeedbackMessage.position.resize(4, 0.0f);
+        m_FeedbackMessage.velocity.resize(4, 0.0f);
+        m_FeedbackMessage.effort.resize(4, 0.0f);
 
         stroke_feedback_publisher = this->create_publisher<sensor_msgs::msg::JointState>("Machine/ActuatorStroke/Feedback", 10);
-        timer = this->create_wall_timer(10ms, std::bind(&SerialRX::FeedbackCallback, this));
+        timer = this->create_wall_timer(1ms, std::bind(&SerialRX::FeedbackCallback, this));
     }
 
   private:
     char feedback_buffer[100];
-    float feedback[7];
-    int a;
+    float feedback[4];
     void FeedbackCallback()
     {
         if (!rclcpp::ok()) {
             close(m_FeedbackFD);
             return;
         }
-        memset((void*)feedback_buffer, ' ' - 0, sizeof(feedback_buffer));
-        read(m_FeedbackFD, feedback_buffer, sizeof(feedback_buffer));
-        uint32_t comma_count = 0;
-        for (char c : feedback_buffer) comma_count += (c == ',');
-        if ((comma_count == 7) && (feedback_buffer[0] != ',')) {
-            sscanf(feedback_buffer, "%i,%f,%f,%f,%f,%f,%f,%f", &a, &feedback[0], &feedback[1], &feedback[2], &feedback[3], &feedback[4], &feedback[5],
-                   &feedback[6]);
-            m_FeedbackMessage.position[0] = feedback[2];
-            m_FeedbackMessage.position[1] = feedback[0];
-            m_FeedbackMessage.position[2] = feedback[1];
+        memset((void*)feedback_buffer, '_' - 0, sizeof(feedback_buffer));
+
+        uint8_t idx = 0;
+
+		do {
+            read(m_FeedbackFD, &feedback_buffer[idx], 1);
+            idx++;
+        } while (feedback_buffer[idx - 1] != '\n');
+
+        uint32_t space_count = 0;
+        for (char c : feedback_buffer) space_count += (c == ' ');
+        if (space_count == 4) {
+            sscanf(feedback_buffer, "%f %f %f %f ", &feedback[0], &feedback[1], &feedback[2], &feedback[3]);
+
+            m_FeedbackMessage.position[0] = feedback[0];
+            m_FeedbackMessage.position[1] = feedback[1];
+            m_FeedbackMessage.position[2] = feedback[2];
+            m_FeedbackMessage.position[3] = feedback[3];
             m_FeedbackMessage.header.stamp = this->get_clock()->now();
             stroke_feedback_publisher->publish(m_FeedbackMessage);
         }
