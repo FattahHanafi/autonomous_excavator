@@ -18,15 +18,17 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(tf2_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
+
 find_package(realsense2 REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(GSL REQUIRED)
 find_package(Boost REQUIRED)
-
-include_directories(include include/)
+find_package(diagnostic_updater REQUIRED)
 
 add_executable(joint_publisher src/joint_publisher.cpp)
 ament_target_dependencies(joint_publisher rclcpp sensor_msgs)
@@ -42,7 +44,7 @@ ament_target_dependencies(blade_node rclcpp geometry_msgs sensor_msgs)
 
 add_executable(camera_reader src/camera_reader.cpp)
 ament_target_dependencies(camera_reader rclcpp sensor_msgs realsense2 cv_bridge GSL)
-target_include_directories(camera_reader PRIVATE ${realsense_INCLUDE_DIR})
+target_include_directories(camera_reader PRIVATE ${realsense2_INCLUDE_DIR})
 target_link_libraries(camera_reader ${realsense2_LIBRARY})
 
 add_executable(roi_node src/roi_node.cpp)
@@ -53,12 +55,12 @@ ament_target_dependencies(surface_reconstructor rclcpp std_msgs sensor_msgs GSL 
 
 add_executable(depth_to_point_cloud src/depth_image_to_point_cloud.cpp)
 ament_target_dependencies(depth_to_point_cloud rclcpp std_msgs sensor_msgs realsense2)
-target_include_directories(depth_to_point_cloud PRIVATE ${realsense_INCLUDE_DIR})
+target_include_directories(depth_to_point_cloud PRIVATE ${realsense2_INCLUDE_DIR})
 target_link_libraries(depth_to_point_cloud ${realsense2_LIBRARY})
 
 add_executable(merged src/merged.cpp)
-ament_target_dependencies(merged rclcpp sensor_msgs realsense2 cv_bridge GSL cv_bridge)
-target_include_directories(merged PRIVATE ${realsense_INCLUDE_DIR})
+ament_target_dependencies(merged rclcpp sensor_msgs tf2_msgs tf2_ros nav_msgs realsense2 cv_bridge GSL cv_bridge diagnostic_updater)
+target_include_directories(merged PRIVATE ${realsense2_INCLUDE_DIR} /opt/ros/humble/include/realsense2_camera_msgs/)
 target_link_libraries(merged ${realsense2_LIBRARY})
 
 add_executable(serial_interface src/serial_interface.cpp)
