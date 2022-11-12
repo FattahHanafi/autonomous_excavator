@@ -15,7 +15,7 @@ class RegionOfInterestNode : public rclcpp::Node {
     explicit RegionOfInterestNode() : Node("roi_node")
     {
         roi_subscriber =
-            this->create_subscription<sensor_msgs::msg::RegionOfInterest>("camera/roi", 10, std::bind(&RegionOfInterestNode::roi_callback, this, _1));
+            this->create_subscription<sensor_msgs::msg::RegionOfInterest>("Camera/ROI", 10, std::bind(&RegionOfInterestNode::roi_callback, this, _1));
 
         raw_depth_image_subscriber = this->create_subscription<sensor_msgs::msg::Image>(
             "camera/raw_depth_image", 10, std::bind(&RegionOfInterestNode::raw_depth_image_callback, this, _1));

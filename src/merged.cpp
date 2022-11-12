@@ -36,14 +36,14 @@ class DepthImagePublisher : public rclcpp::Node {
     explicit DepthImagePublisher() : Node("camera_reader")
     {
         roi_subscriber =
-            this->create_subscription<sensor_msgs::msg::RegionOfInterest>("camera/roi", 10, std::bind(&DepthImagePublisher::roi_callback, this, _1));
+            this->create_subscription<sensor_msgs::msg::RegionOfInterest>("Camera/ROI", 10, std::bind(&DepthImagePublisher::roi_callback, this, _1));
 
-        raw_depth_image_publisher = this->create_publisher<sensor_msgs::msg::Image>("camera/raw_depth_image", 10);
-        filtered_depth_image_publisher = this->create_publisher<sensor_msgs::msg::Image>("camera/filtered_depth_image", 10);
-        cropped_filtered_depth_imgae_publisher = this->create_publisher<sensor_msgs::msg::Image>("camera/cropped_filtered_depth_image", 10);
+        rgb_publisher = this->create_publisher<sensor_msgs::msg::Image>("Camera/Raw/RGB", 10);
+        raw_depth_image_publisher = this->create_publisher<sensor_msgs::msg::Image>("Camera/Raw/Depth", 10);
+        filtered_depth_image_publisher = this->create_publisher<sensor_msgs::msg::Image>("Camera/Filtered/Depth", 10);
+        cropped_filtered_depth_imgae_publisher = this->create_publisher<sensor_msgs::msg::Image>("Camera/Cropped/Depth", 10);
 
-        reconstructed_cropped_filtered_depth_image_publisher =
-            this->create_publisher<sensor_msgs::msg::Image>("camera/reconstructed_cropped_filtered_depth_image", 10);
+        reconstructed_cropped_filtered_depth_image_publisher = this->create_publisher<sensor_msgs::msg::Image>("Camera/Reconstructed/Depth", 10);
 
         // point_cloud_publisher = this->create_publisher<sensor_msgs::msg::PointCloud2>("camera/point_cloud", 10);
         //  auto qos = rclcpp::SensorDataQoS();
@@ -53,7 +53,7 @@ class DepthImagePublisher : public rclcpp::Node {
 
         auto qos = rclcpp::QoS(rclcpp::QoSInitialization(qos_profile.history, qos_profile.depth), qos_profile);
 
-        point_cloud_publisher = this->create_publisher<sensor_msgs::msg::PointCloud2>("camera/point_cloud", qos);
+        point_cloud_publisher = this->create_publisher<sensor_msgs::msg::PointCloud2>("Camera/PointCloud", qos);
 
         this->declare_parameter("decimation_filter", false);
         this->declare_parameter("decimation_magnitude", 2);
@@ -80,32 +80,40 @@ class DepthImagePublisher : public rclcpp::Node {
 
         header.frame_id = "camera";
 
-		sensor_msgs::msg::PointField p_x, p_y, p_z;
-		p_x.name = "x";
-		p_x.datatype = sensor_msgs::msg::PointField::FLOAT32;
-		p_x.offset = 0;
-		p_x.count = 1;
+        sensor_msgs::msg::PointField p_x, p_y, p_z, p_rgb;
+        p_x.name = "x";
+        p_x.datatype = sensor_msgs::msg::PointField::FLOAT32;
+        p_x.offset = 0;
+        p_x.count = 1;
 
-		p_y.name = "y";
-		p_y.datatype = sensor_msgs::msg::PointField::FLOAT32;
-		p_y.offset = 4;
-		p_y.count = 1;
+        p_y.name = "y";
+        p_y.datatype = sensor_msgs::msg::PointField::FLOAT32;
+        p_y.offset = 4;
+        p_y.count = 1;
 
-		p_z.name = "z";
-		p_z.datatype = sensor_msgs::msg::PointField::FLOAT32;
-		p_z.offset = 8;
-		p_z.count = 1;
-		point_cloud_message.fields.push_back(p_x);
-		point_cloud_message.fields.push_back(p_y);
-		point_cloud_message.fields.push_back(p_z);
+        p_z.name = "z";
+        p_z.datatype = sensor_msgs::msg::PointField::FLOAT32;
+        p_z.offset = 8;
+        p_z.count = 1;
+
+        p_rgb.name = "r";
+        p_rgb.datatype = sensor_msgs::msg::PointField::UINT8;
+        p_rgb.offset = 12;
+        p_rgb.count = 3;
+
+        point_cloud_message.fields.push_back(p_x);
+        point_cloud_message.fields.push_back(p_y);
+        point_cloud_message.fields.push_back(p_z);
+        point_cloud_message.fields.push_back(p_rgb);
 
         pipe.start();
 
-        timer_ = this->create_wall_timer(1000ms, std::bind(&DepthImagePublisher::captureImage, this));
+        timer = this->create_wall_timer(1000ms, std::bind(&DepthImagePublisher::captureImage, this));
     }
 
   private:
     sensor_msgs::msg::RegionOfInterest roi;
+    sensor_msgs::msg::Image::SharedPtr rgb_message;
     sensor_msgs::msg::Image::SharedPtr depth_image_message;
     sensor_msgs::msg::Image::SharedPtr filtered_depth_image_message;
     sensor_msgs::msg::Image::SharedPtr cropped_filtered_depth_image_message;
@@ -132,9 +140,13 @@ class DepthImagePublisher : public rclcpp::Node {
         auto depth_frame = frameset.get_depth_frame();
         auto color_frame = frameset.get_color_frame();
 
-        cv::Mat depth_data(cv::Size(depth_frame.get_width(), depth_frame.get_height()), CV_16U, (void *)depth_frame.get_data(), cv::Mat::AUTO_STEP);
-
         header.stamp = this->get_clock().get()->now();
+        cv::Mat rgb_data(cv::Size(color_frame.get_width(), color_frame.get_height()), CV_8UC3, (void *)color_frame.get_data(), cv::Mat::AUTO_STEP);
+
+        cv::Mat depth_data(cv::Size(depth_frame.get_width(), depth_frame.get_height()), CV_16U, (void *)depth_frame.get_data(), cv::Mat::AUTO_STEP);
+        rgb_message = cv_bridge::CvImage(header, sensor_msgs::image_encodings::TYPE_8UC3, rgb_data).toImageMsg();
+        rgb_publisher->publish(*rgb_message);
+
         depth_image_message = cv_bridge::CvImage(header, sensor_msgs::image_encodings::TYPE_16UC1, depth_data).toImageMsg();
         raw_depth_image_publisher->publish(*depth_image_message);
 
@@ -261,6 +273,7 @@ class DepthImagePublisher : public rclcpp::Node {
                 // gsl_multifit_wlinear(X, w, y, c, cov, &chisq, mw);
                 // tss = gsl_stats_wtss(w->data, 1, y->data, 1, y->size);
                 gsl_multifit_linear(X, y, c, cov, &chisq, mw);
+
                 tss = gsl_stats_tss(y->data, 1, y->size);
                 Rsq += 1.0 - chisq / tss;
             }
@@ -268,10 +281,15 @@ class DepthImagePublisher : public rclcpp::Node {
             double yi, yerr;
 
             for (uint32_t j = 0; j < roi.width; j++) {
-                gsl_bspline_eval(j, B, bw);
-                gsl_multifit_linear_est(B, c, cov, &yi, &yerr);
-                idx = (i + roi.y_offset) * depth_frame.get_width() + (j + roi.x_offset);
-                data_ptr[idx] = static_cast<ushort>(yi);
+                if (Rsq > 0.9) {
+                    gsl_bspline_eval(j, B, bw);
+                    gsl_multifit_linear_est(B, c, cov, &yi, &yerr);
+                    idx = (i + roi.y_offset) * depth_frame.get_width() + (j + roi.x_offset);
+                    data_ptr[idx] = static_cast<ushort>(yi);
+                }
+                else {
+                    data_ptr[idx] = 0;
+                }
             }
         }
 
@@ -300,13 +318,13 @@ class DepthImagePublisher : public rclcpp::Node {
         // point_cloud_message.data.clear();
         // point_cloud_message.data.reserve(points.size() * sizeof(rs2::vertex));
 
-		auto pc_ptr = (uint8_t*) points.get_vertices();
+        auto pc_ptr = (uint8_t *)points.get_vertices();
         int i;
         for (i = 0; i < points.get_data_size(); ++i) {
-			point_cloud_message.data[i] = pc_ptr[i];
+            point_cloud_message.data[i] = pc_ptr[i];
         }
 
-//		point_cloud_message.header.frame_id = "camera";
+        //		point_cloud_message.header.frame_id = "camera";
 
         RCLCPP_INFO(this->get_logger(), "Total points = %u published.", i);
         point_cloud_publisher->publish(point_cloud_message);
@@ -325,7 +343,8 @@ class DepthImagePublisher : public rclcpp::Node {
 
     rclcpp::Subscription<sensor_msgs::msg::RegionOfInterest>::SharedPtr roi_subscriber;
 
-    rclcpp::TimerBase::SharedPtr timer_;
+    rclcpp::TimerBase::SharedPtr timer;
+    rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr rgb_publisher;
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr raw_depth_image_publisher;
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr filtered_depth_image_publisher;
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr cropped_raw_depth_imgae_publisher;

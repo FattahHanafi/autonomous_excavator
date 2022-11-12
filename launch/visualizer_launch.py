@@ -16,6 +16,9 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='autonomous_excavator',
+            executable='serial_interface'),
+        Node(
+            package='autonomous_excavator',
             executable='joint_publisher'),
         Node(
             package='autonomous_excavator',

@@ -8,7 +8,7 @@ class StrokePiblisher : public rclcpp::Node {
     StrokePiblisher() : Node("stroke_publisher")
     {
         joint_angle_publisher = this->create_publisher<sensor_msgs::msg::JointState>("Machine/ActuatorStroke/Command", 10);
-        timer_ = this->create_wall_timer(1ms, std::bind(&StrokePiblisher::timer_callback, this));
+        timer_ = this->create_wall_timer(10ms, std::bind(&StrokePiblisher::timer_callback, this));
         stroke_message.name.resize(4);
         stroke_message.position.resize(4, 0.0f);
         stroke_message.velocity.resize(4, 0.0f);
@@ -25,8 +25,8 @@ class StrokePiblisher : public rclcpp::Node {
     {
         auto now = this->get_clock()->now();
         stroke_message.position[0] = 0.0;
-        stroke_message.position[1] = 450.0;
-        stroke_message.position[2] = 450.0;  // * 0.2 * std::sin(1 * now.seconds());
+        stroke_message.position[1] = 470.0 + 30.0 * std::sin(2 * now.seconds());
+        stroke_message.position[2] = 470.0 + 30.0 * std::sin(2 * now.seconds());
         stroke_message.position[3] = 470.0 + 30.0 * std::sin(2 * now.seconds());
         stroke_message.header.stamp = now;
         joint_angle_publisher->publish(stroke_message);

@@ -44,7 +44,7 @@ class DepthImagePublisher : public rclcpp::Node {
 
         pipe.start();
 
-        timer_ = this->create_wall_timer(1000ms, std::bind(&DepthImagePublisher::captureImage, this));
+        timer = this->create_wall_timer(1000ms, std::bind(&DepthImagePublisher::captureImage, this));
     }
 
   private:
@@ -144,7 +144,7 @@ class DepthImagePublisher : public rclcpp::Node {
         filtered_depth_image_publisher->publish(*filtered_depth_image_message);
     }
 
-    rclcpp::TimerBase::SharedPtr timer_;
+    rclcpp::TimerBase::SharedPtr timer;
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr raw_depth_image_publisher;
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr filtered_depth_image_publisher;
 };
