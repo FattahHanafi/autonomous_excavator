@@ -17,6 +17,7 @@
 #include "sensor_msgs/msg/image.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
 #include "sensor_msgs/msg/region_of_interest.hpp"
+#include "sensor_msgs/point_cloud2_iterator.hpp"
 #include "std_msgs/msg/header.hpp"
 
 #define NCOEFFS 12
@@ -101,10 +102,10 @@ class DepthImagePublisher : public rclcpp::Node {
         p_z.offset = 8;
         p_z.count = 1;
 
-        p_rgb.name = "r";
-        p_rgb.datatype = sensor_msgs::msg::PointField::UINT8;
+        p_rgb.name = "rgb";
+        p_rgb.datatype = sensor_msgs::msg::PointField::UINT32;
         p_rgb.offset = 12;
-        p_rgb.count = 3;
+        p_rgb.count = 1;
 
         point_cloud_message.fields.push_back(p_x);
         point_cloud_message.fields.push_back(p_y);
@@ -292,12 +293,26 @@ class DepthImagePublisher : public rclcpp::Node {
         point_cloud_message.set__header(header);
         point_cloud_message.height = depth_frame.get_height();
         point_cloud_message.width = depth_frame.get_width();
-        point_cloud_message.point_step = sizeof(rs2::vertex);
+        point_cloud_message.point_step = 3 * sizeof(float) + 1 * sizeof(uint32_t);
         point_cloud_message.row_step = depth_frame.get_width() * point_cloud_message.point_step;
         point_cloud_message.is_dense = true;
         point_cloud_message.data.resize(point_cloud_message.height * point_cloud_message.row_step);
 
-        memcpy(point_cloud_message.data.data(), points.get_vertices(), points.get_data_size());
+        sensor_msgs::PointCloud2Iterator<float> xyz_it(point_cloud_message, "x");
+        sensor_msgs::PointCloud2Iterator<uint32_t> rgb_it(point_cloud_message, "rgb");
+		const uint8_t *rgb_value = (const uint8_t *)color_frame.get_data();
+
+        const rs2::vertex *point = points.get_vertices();
+        for (uint32_t i = 0; i < point_cloud_message.width * point_cloud_message.height; ++i, ++xyz_it, ++rgb_it) {
+            xyz_it[0] = point[i].x;
+            xyz_it[1] = point[i].y;
+            xyz_it[2] = point[i].z; 
+			*rgb_it = 0X0000FF00; // AARRGGBB
+			*rgb_it =  uint32_t(rgb_value[3 * i + 0]) << 16;
+			*rgb_it +=  uint32_t(rgb_value[3 * i + 1]) << 8;
+			*rgb_it +=  uint32_t(rgb_value[3 * i + 2]) << 0;
+        }
+
         point_cloud_publisher->publish(point_cloud_message);
     }
 
