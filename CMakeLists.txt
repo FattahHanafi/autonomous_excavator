@@ -21,7 +21,11 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
 find_package(tf2_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_sensor_msgs REQUIRED)
+find_package(pcl_ros REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
@@ -54,6 +58,9 @@ ament_target_dependencies(joint_publisher rclcpp sensor_msgs)
 add_executable(stroke_publisher src/stroke_publisher.cpp)
 ament_target_dependencies(stroke_publisher rclcpp sensor_msgs)
 
+add_executable(feedback_logger src/feedback_logger.cpp)
+ament_target_dependencies(feedback_logger rclcpp sensor_msgs std_msgs)
+
 add_executable(excavator_tf2_broadcaster src/excavator_tf2_broadcaster.cpp)
 ament_target_dependencies(excavator_tf2_broadcaster rclcpp geometry_msgs sensor_msgs tf2 tf2_ros)
 
@@ -85,7 +92,7 @@ add_executable(serial_interface src/serial_interface.cpp)
 ament_target_dependencies(serial_interface rclcpp sensor_msgs std_msgs)
 
 add_executable(marching_cubes_node src/marching_cubes_node.cpp)
-ament_target_dependencies(marching_cubes_node rclcpp std_msgs geometry_msgs sensor_msgs)
+ament_target_dependencies(marching_cubes_node rclcpp std_msgs geometry_msgs sensor_msgs visualization_msgs tf2 tf2_msgs tf2_geometry_msgs tf2_sensor_msgs pcl_ros)
 target_include_directories(marching_cubes_node PRIVATE include/MarchingCubes.h)
 target_link_libraries(marching_cubes_node MarchinCubesClass)
 
@@ -101,6 +108,7 @@ install(TARGETS
   merged
   serial_interface
   marching_cubes_node
+  feedback_logger
   DESTINATION lib/${PROJECT_NAME})
 
 # install the launch directory
