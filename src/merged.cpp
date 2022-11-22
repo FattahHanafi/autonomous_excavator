@@ -198,7 +198,6 @@ class DepthImagePublisher : public rclcpp::Node {
         tmp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, tmp_smd);
 
         /* int hlf_hlf = this->get_parameter("hole_filling").get_parameter_value().get<int>();
-                hlf_filer.supports
         hlf_hlf = (hlf_hlf > 2) ? 2 : hlf_hlf;
         hlf_hlf = (hlf_hlf < 0) ? 0 : hlf_hlf;
         hlf_filter.set_option(RS2_OPTION_FILTER_OPTION, hlf_hlf); */
@@ -229,16 +228,20 @@ class DepthImagePublisher : public rclcpp::Node {
 
         if (!roi.width || !roi.height) return;
 
-        auto data_ptr = (uint16_t *)depth_frame.get_data();
+        uint8_t *data_ptr = (uint8_t *)depth_frame.get_data();
 
-        int idx = 0;
-        for (int i = 0; i < depth_frame.get_height(); ++i)
-            for (int j = 0; j < depth_frame.get_width(); ++j) {
-                if ((i < (int)roi.y_offset) || (i > (int)(roi.y_offset + roi.height)) || (j < (int)roi.x_offset) ||
-                    (j > (int)(roi.x_offset + roi.width)))
-                    data_ptr[idx] = 0;
-                idx++;
+        const uint32_t row_step = depth_frame.get_width() * depth_frame.get_bytes_per_pixel();
+        const uint32_t pxl_step = depth_frame.get_bytes_per_pixel();
+
+        for (int i = 0; i < depth_frame.get_height(); ++i) {
+            if (i < int(roi.y_offset) || i >= int(roi.y_offset + roi.height)) {
+                memset(&data_ptr[i * row_step], 0, row_step);
             }
+            else {
+                memset(&data_ptr[i * row_step], 0, pxl_step * roi.x_offset);
+                memset(&data_ptr[i * row_step + (roi.x_offset + roi.width) * pxl_step], 0, row_step - pxl_step * (roi.x_offset - roi.width));
+            }
+        }
 
         cv::Mat cropped_filtered_depth_data(cv::Size(depth_frame.get_width(), depth_frame.get_height()), CV_16U, (void *)depth_frame.get_data(),
                                             cv::Mat::AUTO_STEP);
@@ -249,6 +252,7 @@ class DepthImagePublisher : public rclcpp::Node {
         cropped_filtered_depth_imgae_publisher->publish(*cropped_filtered_depth_image_message);
 
         // Assign y value
+        uint32_t idx = 0;
         for (uint32_t i = 0; i < roi.height; ++i) {
             for (uint32_t j = 0; j < roi.width; ++j) {
                 uint32_t idx2 = (i + roi.y_offset) * depth_frame.get_width() + (j + roi.x_offset);
@@ -290,29 +294,36 @@ class DepthImagePublisher : public rclcpp::Node {
 
         auto points = point_cloud.calculate(depth_frame);
 
+        // point_cloud_message.set__header(header);
+        // point_cloud_message.height = depth_frame.get_height();
+        // point_cloud_message.width = depth_frame.get_width();
+        // point_cloud_message.point_step = 3 * sizeof(float) + 1 * sizeof(uint32_t);
+        // point_cloud_message.row_step = depth_frame.get_width() * point_cloud_message.point_step;
+        // point_cloud_message.is_dense = true;
+        // point_cloud_message.data.resize(point_cloud_message.height * point_cloud_message.row_step);
+
         point_cloud_message.set__header(header);
-        point_cloud_message.height = depth_frame.get_height();
-        point_cloud_message.width = depth_frame.get_width();
+        point_cloud_message.height = roi.height;
+        point_cloud_message.width = roi.width;
         point_cloud_message.point_step = 3 * sizeof(float) + 1 * sizeof(uint32_t);
-        point_cloud_message.row_step = depth_frame.get_width() * point_cloud_message.point_step;
+        point_cloud_message.row_step = roi.width * point_cloud_message.point_step;
         point_cloud_message.is_dense = true;
         point_cloud_message.data.resize(point_cloud_message.height * point_cloud_message.row_step);
 
         sensor_msgs::PointCloud2Iterator<float> xyz_it(point_cloud_message, "x");
         sensor_msgs::PointCloud2Iterator<uint32_t> rgb_it(point_cloud_message, "rgb");
-		const uint8_t *rgb_value = (const uint8_t *)color_frame.get_data();
+        const uint8_t *rgb_value = (const uint8_t *)color_frame.get_data();
 
         const rs2::vertex *point = points.get_vertices();
-        for (uint32_t i = 0; i < point_cloud_message.width * point_cloud_message.height; ++i, ++xyz_it, ++rgb_it) {
-            xyz_it[0] = point[i].x;
-            xyz_it[1] = point[i].y;
-            xyz_it[2] = point[i].z; 
-			*rgb_it = 0X0000FF00; // AARRGGBB
-			*rgb_it =  uint32_t(rgb_value[3 * i + 0]) << 16;
-			*rgb_it +=  uint32_t(rgb_value[3 * i + 1]) << 8;
-			*rgb_it +=  uint32_t(rgb_value[3 * i + 2]) << 0;
-        }
-
+        for (uint32_t i = roi.y_offset; i < roi.y_offset + roi.height; ++i)
+            for (uint32_t j = roi.x_offset; j < roi.x_offset + roi.width; ++j, ++xyz_it, ++rgb_it) {
+                xyz_it[0] = point[i * depth_frame.get_width() + j].x;
+                xyz_it[1] = point[i * depth_frame.get_width() + j].y;
+                xyz_it[2] = point[i * depth_frame.get_width() + j].z;
+                *rgb_it = uint32_t(rgb_value[3 * (i * depth_frame.get_width() + j) + 0]) << 16;
+                *rgb_it += uint32_t(rgb_value[3 * (i * depth_frame.get_width() + j) + 1]) << 8;
+                *rgb_it += uint32_t(rgb_value[3 * (i * depth_frame.get_width() + j) + 2]) << 0;
+            }
         point_cloud_publisher->publish(point_cloud_message);
     }
 

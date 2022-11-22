@@ -76,7 +76,7 @@ add_executable(roi_node src/roi_node.cpp)
 ament_target_dependencies(roi_node rclcpp sensor_msgs std_msgs cv_bridge)
 
 add_executable(surface_reconstructor src/surface_reconstructor.cpp)
-ament_target_dependencies(surface_reconstructor rclcpp std_msgs sensor_msgs GSL cv_bridge)
+ament_target_dependencies(surface_reconstructor rclcpp std_msgs sensor_msgs visualization_msgs)
 
 add_executable(depth_to_point_cloud src/depth_image_to_point_cloud.cpp)
 ament_target_dependencies(depth_to_point_cloud rclcpp std_msgs sensor_msgs realsense2)

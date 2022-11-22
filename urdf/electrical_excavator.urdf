@@ -18,6 +18,8 @@
   </material>
 
   <link name="world"/>
+  
+  <link name="container"/>
 
   <link name="base">
     <visual>
@@ -88,6 +90,12 @@
   <joint name="fix" type="fixed">
   	<parent link="world"/>
 	<child link="base"/>
+  </joint>
+  
+  <joint name="container_fix" type="fixed">
+  	<origin xyz="1.200 -0.013 -0.750" rpy="0 0 0" />
+  	<parent link="world"/>
+	<child link="container"/>
   </joint>
 
   <joint name="camera_bracket_fix" type="fixed">
