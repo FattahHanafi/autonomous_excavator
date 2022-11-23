@@ -270,7 +270,7 @@ class DepthImagePublisher : public rclcpp::Node {
             tss = gsl_stats_tss(y->data, 1, y->size);
             Rsq = 1.0 - chisq / tss;
 
-            if (Rsq > 0.95) {
+            if (Rsq > 0.99) {
                 for (uint32_t j = 0; j < roi.width; j++) {
                     idx = (i + roi.y_offset) * depth_frame.get_width() + (j + roi.x_offset);
                     gsl_bspline_eval(j, B, bw);

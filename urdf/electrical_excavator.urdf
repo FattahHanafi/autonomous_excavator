@@ -93,7 +93,7 @@
   </joint>
   
   <joint name="container_fix" type="fixed">
-  	<origin xyz="1.200 -0.013 -0.750" rpy="0 0 0" />
+  	<origin xyz="1.200 -0.130 -0.750" rpy="0 0 0" />
   	<parent link="world"/>
 	<child link="container"/>
   </joint>
