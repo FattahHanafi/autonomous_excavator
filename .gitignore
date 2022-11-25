@@ -12,3 +12,4 @@ CTest*
 Makefile
 compile_commands.json
 cmake_install.cmake
+*.out

@@ -116,6 +116,25 @@ class DepthImagePublisher : public rclcpp::Node {
         cfg.enable_all_streams();
         cfg.enable_stream(RS2_STREAM_DEPTH, -1, 1280, 720, RS2_FORMAT_ANY, 30);
         cfg.enable_stream(RS2_STREAM_DEPTH, -1, 1280, 720, RS2_FORMAT_ANY, 30);
+
+        RCLCPP_INFO(this->get_logger(), "Getting list of RealSense Sensors");
+        rs2::context ctx;
+        RCLCPP_INFO(this->get_logger(), "Found following RealSense Sensors");
+		rs2::device_list dev_list = ctx.query_devices();
+		uint32_t idx = 1;
+        for (auto q : dev_list) {
+            RCLCPP_INFO(this->get_logger(), "\t %u ) %s", idx, q.get_info(RS2_CAMERA_INFO_NAME));
+			++idx;
+        }
+
+
+        RCLCPP_INFO(this->get_logger(), "Reseting %s", dev_list.front().get_info(RS2_CAMERA_INFO_NAME));
+        dev_list.front().hardware_reset();
+        rs2::device_hub hub(ctx);
+        hub.wait_for_device();
+
+        RCLCPP_INFO(this->get_logger(), "Device is Back");
+
         pipe.start(cfg);
 
         timer = this->create_wall_timer(20ms, std::bind(&DepthImagePublisher::captureImage, this));

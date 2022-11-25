@@ -196,14 +196,14 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        {}
+        mc_cubes: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /MarchingCubes/Markers
+        Value: /MarchingCubes/Cubes
       Value: true
     - Class: rviz_default_plugins/Marker
       Enabled: true

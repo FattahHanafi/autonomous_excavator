@@ -131,10 +131,9 @@ void MarchingCubes::RebuildCubes()
     for (uint32_t i = 0; i < m_Step.x; ++i)
         for (uint32_t j = 0; j < m_Step.y; ++j)
             for (uint32_t k = 0; k < m_Step.z; ++k) {
-                if (!m_UpdateFlag[i][j][k]) continue;
-                m_UpdateFlag[i][j][k] = 0;
-                m_Cubes[i][j][k] = 0;
-                m_Cubes[i][j][k] |= m_Vertices[i + 0][j + 0][k + 0] << 0;
+                // if (!m_UpdateFlag[i][j][k]) continue;
+                // m_UpdateFlag[i][j][k] = 0;
+                m_Cubes[i][j][k] = m_Vertices[i + 0][j + 0][k + 0];
                 m_Cubes[i][j][k] |= m_Vertices[i + 1][j + 0][k + 0] << 1;
                 m_Cubes[i][j][k] |= m_Vertices[i + 1][j + 1][k + 0] << 2;
                 m_Cubes[i][j][k] |= m_Vertices[i + 0][j + 1][k + 0] << 3;
@@ -143,6 +142,16 @@ void MarchingCubes::RebuildCubes()
                 m_Cubes[i][j][k] |= m_Vertices[i + 1][j + 1][k + 1] << 6;
                 m_Cubes[i][j][k] |= m_Vertices[i + 0][j + 1][k + 1] << 7;
             }
+}
+
+float MarchingCubes::CalculateVolume()
+{
+    float volume = 0;
+    for (uint32_t i = 0; i < m_Step.x; ++i)
+        for (uint32_t j = 0; j < m_Step.y; ++j)
+            for (uint32_t k = 0; k < m_Step.z; ++k) volume += m_Volumes[m_Cubes[i][j][k]];
+
+    return volume;
 }
 
 void MarchingCubes::SetBlade(const geometry_msgs::msg::Polygon::SharedPtr msg)

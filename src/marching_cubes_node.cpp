@@ -18,7 +18,7 @@
 #include "../include/MarchingCubes.h"
 #include "../include/Vec3.h"
 
-MarchingCubes mc = MarchingCubes(100.0f, 100.0f, 100.0f, 0.01f, 0.01f, 0.01f);
+MarchingCubes mc = MarchingCubes(135.0f, 60.0f, 60.0f, 0.01f, 0.01f, 0.01f);
 
 using std::placeholders::_1;
 
@@ -42,6 +42,8 @@ class MarchingCubesPublisher : public rclcpp::Node {
         m_marker_message.pose.orientation.z = 0;
         m_marker_message.pose.orientation.w = 1;
         m_marker_message.color.r = 1;
+		m_marker_message.color.g = 0.8;
+		m_marker_message.color.b = 0;
         m_marker_message.color.a = 1;
         m_marker_message.scale.x = 1;
         m_marker_message.scale.y = 1;
