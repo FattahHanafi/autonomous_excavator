@@ -34,9 +34,9 @@ def generate_launch_description():
             executable='robot_state_publisher',
             parameters=[{'robot_description': robot_desc}],
             arguments=[urdf]),
-        #  Node(
-            #  package='rviz2',
-            #  executable='rviz2',
-            #  output='screen',
-            #  arguments=['-d', rviz]),
+        Node(
+            package='rviz2',
+            executable='rviz2',
+            output='screen',
+            arguments=['-d', rviz]),
     ])

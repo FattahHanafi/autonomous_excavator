@@ -4,31 +4,31 @@ Blade::Blade(){};
 
 Blade::Blade(const geometry_msgs::msg::Polygon::SharedPtr msg)
 {
-    m_VerticesCount = msg->points.size();
-    m_OldFace->points.resize(m_VerticesCount);
-    m_NewFace->points.resize(m_VerticesCount);
+    VerticesCount = msg->points.size();
+    OldFace->points.resize(VerticesCount);
+    NewFace->points.resize(VerticesCount);
 
-    for (uint32_t i = 0; i < m_VerticesCount; ++i) {
-        m_OldFace->points[i].x = msg->points[i].x;
-        m_OldFace->points[i].y = msg->points[i].y;
-        m_OldFace->points[i].z = msg->points[i].z;
+    for (uint32_t i = 0; i < VerticesCount; ++i) {
+        OldFace->points[i].x = msg->points[i].x;
+        OldFace->points[i].y = msg->points[i].y;
+        OldFace->points[i].z = msg->points[i].z;
 
-        m_NewFace->points[i].x = msg->points[i].x;
-        m_NewFace->points[i].y = msg->points[i].y;
-        m_NewFace->points[i].z = msg->points[i].z;
+        NewFace->points[i].x = msg->points[i].x;
+        NewFace->points[i].y = msg->points[i].y;
+        NewFace->points[i].z = msg->points[i].z;
     }
 }
 
-void Blade::Update(const geometry_msgs::msg::Polygon::SharedPtr msg)
+void Blade::Update(geometry_msgs::msg::Polygon* msg)
 {
-    for (uint32_t i = 0; i < m_VerticesCount; ++i) {
-        m_OldFace->points[i].x = m_NewFace->points[i].x;
-        m_OldFace->points[i].y = m_NewFace->points[i].y;
-        m_OldFace->points[i].z = m_NewFace->points[i].z;
+    for (uint32_t i = 0; i < VerticesCount; ++i) {
+        OldFace->points[i].x = NewFace->points[i].x;
+        OldFace->points[i].y = NewFace->points[i].y;
+        OldFace->points[i].z = NewFace->points[i].z;
 
-        m_NewFace->points[i].x = msg->points[i].x;
-        m_NewFace->points[i].y = msg->points[i].y;
-        m_NewFace->points[i].z = msg->points[i].z;
+        NewFace->points[i].x = msg->points[i].x;
+        NewFace->points[i].y = msg->points[i].y;
+        NewFace->points[i].z = msg->points[i].z;
     }
 };
 

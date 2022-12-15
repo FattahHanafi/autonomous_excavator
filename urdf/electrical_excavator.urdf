@@ -93,20 +93,23 @@
   </joint>
   
   <joint name="container_fix" type="fixed">
-  	<origin xyz="1.200 -0.130 -0.750" rpy="0 0 0" />
+      <!-- <origin xyz="1.200 -0.130 -0.750" rpy="0 0 0" /> -->
+  	<origin xyz="1.200 -0.430 -0.750" rpy="0 0 0" />
   	<parent link="world"/>
 	<child link="container"/>
   </joint>
 
   <joint name="camera_bracket_fix" type="fixed">
-	<!-- <origin xyz="0.3604 0.0495 0.1725" rpy="0 0 0" /> -->
 	<origin xyz="0.3872 0.0495 0.0985" rpy="0 0.1974 0" />
   	<parent link="boom"/>
 	<child link="camera_bracket"/>
   </joint>
 
   <joint name="D455_fix" type="fixed">
-	  <origin xyz="0.1065 0.0275 -0.0622" rpy="0 2.6180 0" />
+	  <!-- <origin xyz="0.1065 0.0275 -0.0622" rpy="0.09 2.6180 0" /> -->
+	<!-- <origin xyz="0.1665 0.0275 -0.0622" rpy="0.09 2.6180 0" /> -->
+	<!-- <origin xyz="0.1665 0.0275 -0.0622" rpy="0.09 2.7180 0" /> -->
+	<origin xyz="0.1465 0.0275 -0.0622" rpy="0.09 2.6880 0" />
   	<parent link="camera_bracket"/>
 	<child link="camera"/>
   </joint>
@@ -127,7 +130,6 @@
 
   <joint name="Arm" type="continuous">
     <axis xyz="0.0 1.0 .0" />
-	<!-- <origin xyz="1.050 0 0.210" rpy="0 0 0" /> -->
 	<origin xyz="1.071 0 0" rpy="0 0 0" />
     <parent link="boom"/>
     <child link="arm"/>

@@ -22,9 +22,11 @@ class MarchingCubes {
 
     void RebuildCubes();
 
-    void SetBlade(const geometry_msgs::msg::Polygon::SharedPtr msg);
+    void SetBlade(geometry_msgs::msg::Polygon* msg);
 
     void CreateMessage(visualization_msgs::msg::Marker* msg);
+
+    void CutBlade();
 
     float CalculateVolume();
 
@@ -39,6 +41,10 @@ class MarchingCubes {
     std::vector<std::vector<std::vector<bool>>> m_UpdateFlag;
 
     void SetUpdateCubeList(const uint32_t i, const uint32_t j, const uint32_t k);
+
+    bool IsInside(Blade* blade, geometry_msgs::msg::Point32* P);
+
+    bool sideSign(geometry_msgs::msg::Point32* A, geometry_msgs::msg::Point32* B, geometry_msgs::msg::Point32* C, geometry_msgs::msg::Point32* P);
 
     const float m_Volumes[256] = {
         0.00000000, 0.02083333, 0.02083333, 0.12500000, 0.02083333, 0.04166667, 0.12500000, 0.35416667, 0.02083333, 0.12500000, 0.04166667,

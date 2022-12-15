@@ -8,10 +8,9 @@ class Blade {
 
     Blade(const geometry_msgs::msg::Polygon::SharedPtr msg);
 
-    void Update(const geometry_msgs::msg::Polygon::SharedPtr msg);
+    void Update(geometry_msgs::msg::Polygon* msg);
 
-  private:
-    uint32_t m_VerticesCount = 0;
-    geometry_msgs::msg::Polygon::SharedPtr m_OldFace;
-    geometry_msgs::msg::Polygon::SharedPtr m_NewFace;
+    uint32_t VerticesCount = 0;
+    geometry_msgs::msg::Polygon::SharedPtr OldFace;
+    geometry_msgs::msg::Polygon::SharedPtr NewFace;
 };
