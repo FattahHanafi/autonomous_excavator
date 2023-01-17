@@ -52,7 +52,7 @@ class SerialInterface : public rclcpp::Node {
             isDone = false;
             float f[4];
             memcpy(f, buffer, sizeof(f));
-            m_FeedbackMessage.position[0] = 0;
+            m_FeedbackMessage.position[0] = 0.0 * double(f[0]);
             m_FeedbackMessage.position[1] = double(f[1]);
             m_FeedbackMessage.position[2] = double(f[2]);
             m_FeedbackMessage.position[3] = double(f[3]);

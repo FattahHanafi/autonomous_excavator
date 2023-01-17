@@ -16,8 +16,8 @@ class SurfaceReconstructor : public rclcpp::Node {
         m_marker_message.ns = "soil_surface";
         m_marker_message.id = 0;
         m_marker_message.header.frame_id = "camera";
-        m_marker_message.type = 11;
-        m_marker_message.action = 0;
+        m_marker_message.type = visualization_msgs::msg::Marker::TRIANGLE_LIST;
+        m_marker_message.action = visualization_msgs::msg::Marker::ADD;
         m_marker_message.pose.position.x = 0;
         m_marker_message.pose.position.y = 0;
         m_marker_message.pose.position.z = 0;
@@ -39,21 +39,23 @@ class SurfaceReconstructor : public rclcpp::Node {
   private:
     void pc_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
     {
-        sensor_msgs::PointCloud2Iterator<float> it_top(*msg, "x");
-        sensor_msgs::PointCloud2Iterator<float> it_bottom(*msg, "x");
+        sensor_msgs::PointCloud2ConstIterator<float> it_top(*msg, "x");
+        sensor_msgs::PointCloud2ConstIterator<float> it_bottom(*msg, "x");
+
+		const uint32_t width = msg->width;
+		const uint32_t height = msg->height;
+
         m_marker_message.points.clear();
-        for (uint32_t i = 0; i < msg->width; ++i) {
-            ++it_top;
-        }
+		it_top += width;
 
         geometry_msgs::msg::Point top_point;
         geometry_msgs::msg::Point bottom_point;
-        for (uint32_t i = 0; i < (msg->height - 1); ++i) {
+        for (uint32_t i = 0; i < (height - 1); ++i) {
             if (i != 0) {
                 ++it_top;
                 ++it_bottom;
             }
-            for (uint32_t j = 0; j < (msg->width - 1); ++j) {
+            for (uint32_t j = 0; j < (width - 1); ++j) {
                 bottom_point.x = it_bottom[0];
                 bottom_point.y = it_bottom[1];
                 bottom_point.z = it_bottom[2];

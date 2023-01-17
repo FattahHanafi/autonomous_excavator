@@ -28,34 +28,47 @@ class StrokePiblisher : public rclcpp::Node {
     void timer_callback()
     {
         auto now = this->get_clock()->now();
-		float depth = this->get_parameter("depth").get_parameter_value().get<float>();
+        float depth = this->get_parameter("depth").get_parameter_value().get<float>();
         auto rt = (now - start_time).seconds();
         if (rt < 1 * step_time) {
+            stroke_message.position[0] = 0.15f;
             stroke_message.position[1] = 430.0f;
             stroke_message.position[2] = 580.0f;
             stroke_message.position[3] = 420.0f;
         }
         else if (rt < 2 * step_time) {
+            stroke_message.position[0] = 0.15f;
             stroke_message.position[1] = depth;
             stroke_message.position[2] = 580.0f;
             stroke_message.position[3] = 420.0f;
         }
         else if (rt < 3 * step_time) {
+            stroke_message.position[0] = 0.15f;
             stroke_message.position[1] = depth;
             stroke_message.position[2] = 450.0f;
             stroke_message.position[3] = 580.0f;
         }
         else if (rt < 4 * step_time) {
+            stroke_message.position[0] = 0.15f;
             stroke_message.position[1] = 430.0f;
             stroke_message.position[2] = 450.0f;
             stroke_message.position[3] = 580.0f;
         }
-        else{
+        else if (rt < 5 * step_time) {
+            stroke_message.position[0] = -0.4f;
+            stroke_message.position[1] = 430.0f;
+            stroke_message.position[2] = 450.0f;
+            stroke_message.position[3] = 580.0f;
+        }
+        else {
+            stroke_message.position[0] = -0.4f;
             stroke_message.position[1] = 430.0f;
             stroke_message.position[2] = 580.0f;
             stroke_message.position[3] = 420.0f;
         }
-        stroke_message.position[0] = 0.0;
+
+        if (rt > 7 * step_time) start_time = this->get_clock()->now();
+
         // stroke_message.position[1] = this->get_parameter("S1").get_parameter_value().get<double>();
         // stroke_message.position[2] = this->get_parameter("S2").get_parameter_value().get<double>();
         // stroke_message.position[3] = this->get_parameter("S3").get_parameter_value().get<double>();
