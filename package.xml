@@ -9,11 +9,16 @@
 
   <depend>geometry_msgs</depend>
   <depend>sensor_msgs</depend>
-  <depend>rclcpp</depend>
   <depend>tf2</depend>
   <depend>tf2_ros</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+ 
+  <exec_depend>rclcpp</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+
+  <member_of_group>rosidl_interface_packages</member_of_group>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

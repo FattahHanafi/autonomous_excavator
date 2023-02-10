@@ -1,16 +1,17 @@
 #pragma once
 #include <geometry_msgs/msg/polygon.hpp>
-#include <iostream>
 
 class Blade {
-  public:
-    Blade();
+ public:
+  Blade();
 
-    Blade(const geometry_msgs::msg::Polygon::SharedPtr msg);
+  Blade(const geometry_msgs::msg::Polygon::SharedPtr msg);
 
-    void Update(geometry_msgs::msg::Polygon* msg);
+  void Update(geometry_msgs::msg::Polygon::SharedPtr msg);
 
-    uint32_t VerticesCount = 0;
-    geometry_msgs::msg::Polygon::SharedPtr OldFace;
-    geometry_msgs::msg::Polygon::SharedPtr NewFace;
+  geometry_msgs::msg::Polygon OldFace;
+  geometry_msgs::msg::Polygon NewFace;
+
+ private:
+  const uint32_t m_VerticesCount = 0;
 };
