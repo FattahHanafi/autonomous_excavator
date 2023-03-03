@@ -26,14 +26,13 @@ class udp_rx(Node):
 
         sock.bind(('192.168.1.12', 5000))
         while (rclpy.ok()):
-            time.sleep(0.01)
-            # data, _ = sock.recvfrom(100)
-            # data = struct.unpack('d' * (len(data) // 8), data)
+            data, _ = sock.recvfrom(100)
+            data = struct.unpack('d' * (len(data) // 8), data)
             joint_message.header.stamp = self.get_clock().now().to_msg()
-            joint_message.position[0] = 0 #data[0]
-            joint_message.position[1] = 420 #data[1]
-            joint_message.position[2] = 590 #data[2]
-            joint_message.position[3] = 420 #data[3]
+            joint_message.position[0] = -data[0]
+            joint_message.position[1] = data[1]
+            joint_message.position[2] = data[2]
+            joint_message.position[3] = data[3]
             self.joint_publishers.publish(joint_message)
 
 

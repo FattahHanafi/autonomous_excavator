@@ -300,15 +300,15 @@ class CameraClass : public rclcpp::Node {
       m_buttomSurface.row_step = m_buttomSurface.width * m_buttomSurface.point_step;
       m_buttomSurface.data.resize(m_buttomSurface.height * m_buttomSurface.row_step);
       sensor_msgs::PointCloud2Iterator<float> xyz_bt(m_buttomSurface, "x");
-      xyz_bt[0] = 0;
-      xyz_bt[1] = 0;
-      xyz_bt[2] = 0;
+      xyz_bt[0] = 0.0f;
+      xyz_bt[1] = 0.0f;
+      xyz_bt[2] = 0.0f;
       ++xyz_bt;
-      xyz_bt[0] = m_MC->m_Step.x * m_MC->m_Size.x;
-      xyz_bt[1] = 0;
-      xyz_bt[2] = 0;
+      xyz_bt[0] = float(m_MC->m_Step.x * m_MC->m_Size.x);
+      xyz_bt[1] = 0.0f;
+      xyz_bt[2] = 0.0f;
     } else if (this->get_effective_namespace() == "/Camera_Bucket") {
-      m_MC = std::make_unique<MarchingCubes>(60, 60, 150, 0.010);
+      m_MC = std::make_unique<MarchingCubes>(5.0 * 60, 5.0 * 60, 5.0 * 150, 0.010 / 5.0);
       m_marchingCubes.color.r = 0.5;
       m_marchingCubes.color.g = 0.5;
       m_marchingCubes.color.b = 0.5;
@@ -317,27 +317,28 @@ class CameraClass : public rclcpp::Node {
       m_reconstructedDepthImage.header.frame_id = "Camera_Bucket_depth_optical_frame";
       m_soilPointCloud.header.frame_id = "Camera_Bucket_depth_optical_frame";
       m_reconstructedSoilPointCloud.header.frame_id = "Camera_Bucket_depth_optical_frame";
-      m_buttomSurface.header.frame_id = "Bucket_container";
+      m_buttomSurface.header.frame_id = "bucket";
       m_buttomSurface.width = 4;
       m_buttomSurface.height = 1;
       m_buttomSurface.row_step = m_buttomSurface.width * m_buttomSurface.point_step;
       m_buttomSurface.data.resize(m_buttomSurface.height * m_buttomSurface.row_step);
       sensor_msgs::PointCloud2Iterator<float> xyz_bt(m_buttomSurface, "x");
+      xyz_bt[0] = 0.34804f;
+      xyz_bt[1] = 0.0f;
+      xyz_bt[2] = -0.02579f;
+      ++xyz_bt;
+      xyz_bt[0] = 0.30215f;
+      xyz_bt[1] = 0.0f;
+      xyz_bt[2] = 0.06393f;
+      ++xyz_bt;
+      xyz_bt[0] = 0.15408f;
+      xyz_bt[1] = 0.0f;
+      xyz_bt[2] = 0.17873f;
+      ++xyz_bt;
       xyz_bt[0] = 0.06933f;
       xyz_bt[1] = 0.0f;
       xyz_bt[2] = 0.01873f;
-      ++xyz_bt;
-      xyz_bt[0] = 0.15408f;
-      xyz_bt[1] = 0;
-      xyz_bt[2] = 0.17873f;
-      ++xyz_bt;
-      xyz_bt[0] = 0.30215f;
-      xyz_bt[1] = 0;
-      xyz_bt[2] = 0.06393f;
-      ++xyz_bt;
-      xyz_bt[0] = 0.34804f;
-      xyz_bt[1] = 0;
-      xyz_bt[2] = -0.02579f;
+
     } else {
       RCLCPP_WARN(this->get_logger(), "Invalid name");
       throw "Invalid Namespace";
@@ -365,6 +366,7 @@ class CameraClass : public rclcpp::Node {
     m_reconstructedDepthPublisher = this->create_publisher<sensor_msgs::msg::Image>("reconstructed/depth", 10);
     m_reconstructedSoilSurfacePublisher = this->create_publisher<sensor_msgs::msg::PointCloud2>("reconstructed/soil_surface", 10);
     m_marchingCubesPublisher = this->create_publisher<visualization_msgs::msg::Marker>("marching_cubes", 10);
+    m_testPublisher = this->create_publisher<sensor_msgs::msg::PointCloud2>("test", 10);
   }
 
   rclcpp_action::GoalResponse handle_goal(const rclcpp_action::GoalUUID &uuid, std::shared_ptr<const Reconstruct::Goal> goal) {
@@ -447,7 +449,7 @@ class CameraClass : public rclcpp::Node {
 
     if (goal_handle->is_canceling()) return;
     auto result = std::make_shared<Reconstruct::Result>();
-    result->volume = vol;
+    result->volume = vol * 1000000.0;  // Convert from m^3 to cm^3
     goal_handle->succeed(result);
   }
 
@@ -515,6 +517,11 @@ class CameraClass : public rclcpp::Node {
 
     rs2_deproject_pixel_to_point(&m_depthImage, &m_soilPointCloud);
     m_soilSurfacePublisher->publish(m_soilPointCloud);
+    buttom_surface_rotate();
+
+    // TEST HERE
+    m_rotatedButtomSurface.header.stamp = this->get_clock()->now();
+    m_testPublisher->publish(m_rotatedButtomSurface);
   }
 
   void color_image_callback(const sensor_msgs::msg::Image &msg) {
@@ -693,8 +700,6 @@ class CameraClass : public rclcpp::Node {
 
     bool isInside = false;
 
-    buttom_surface_rotate();
-
     for (uint32_t i = 0; i < m_MC->m_Step.x + 1; ++i) {
       x = m_MC->m_Orig.x + i * m_MC->m_Size.x;
       for (uint32_t j = 0; j < m_MC->m_Step.y + 1; ++j) {
@@ -729,11 +734,11 @@ class CameraClass : public rclcpp::Node {
 
         } while (!found);
 
-        zb = 0;
+        // zb = 0;
         // zs = 1.5;
         for (uint32_t k = 0; k < m_MC->m_Step.z + 1; ++k) {
           z = k * m_MC->m_Size.z;
-          m_MC->SetVertex(i, j, k, z > zb && z < zs);
+          m_MC->SetVertex(i, j, k, z > zb && z <= zs);
         }
       }
     }
@@ -764,6 +769,7 @@ class CameraClass : public rclcpp::Node {
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr m_reconstructedDepthPublisher;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr m_reconstructedSoilSurfacePublisher;
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr m_marchingCubesPublisher;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr m_testPublisher;
 
   std::shared_ptr<tf2_ros::Buffer> m_tf_buffer;
   std::shared_ptr<tf2_ros::TransformListener> m_tf_listener;
