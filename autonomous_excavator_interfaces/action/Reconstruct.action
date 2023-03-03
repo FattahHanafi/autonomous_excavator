@@ -1,0 +1,8 @@
+# Request
+bool trigger
+---
+# Response
+float64 volume
+---
+# Feedback
+std_msgs/String process

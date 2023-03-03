@@ -1,0 +1,139 @@
+#include "MarchingCubes.hpp"
+
+MarchingCubes::MarchingCubes(){};
+
+MarchingCubes::MarchingCubes(const double x_step, const double y_step, const double z_step, const double size) {
+  m_Step.x = x_step;
+  m_Step.y = y_step;
+  m_Step.z = z_step;
+  m_Size.x = size;
+  m_Size.y = size;
+  m_Size.z = size;
+
+  m_Vertices.resize(m_Step.x + 1);
+  for (auto& r1 : m_Vertices) {
+    r1.reserve((m_Step.y + 1));
+    for (auto& r2 : r1) r2.resize(m_Step.z + 1, 0);
+  }
+
+  m_Cubes.resize(m_Step.x);
+  for (auto& r1 : m_Cubes) {
+    r1.reserve((m_Step.y));
+    for (auto& r2 : r1) r2.resize(m_Step.z, 0);
+  }
+
+  m_Nodes.at(0).x = 0.5 * m_Size.x;
+  m_Nodes.at(0).y = 0.0 * m_Size.y;
+  m_Nodes.at(0).z = 0.0 * m_Size.z;
+
+  m_Nodes.at(1).x = 1.0 * m_Size.x;
+  m_Nodes.at(1).y = 0.5 * m_Size.y;
+  m_Nodes.at(1).z = 0.0 * m_Size.z;
+
+  m_Nodes.at(2).x = 0.5 * m_Size.x;
+  m_Nodes.at(2).y = 1.0 * m_Size.y;
+  m_Nodes.at(2).z = 0.0 * m_Size.z;
+
+  m_Nodes.at(3).x = 0.0 * m_Size.x;
+  m_Nodes.at(3).y = 0.5 * m_Size.y;
+  m_Nodes.at(3).z = 0.0 * m_Size.z;
+
+  m_Nodes.at(4).x = 0.0 * m_Size.x;
+  m_Nodes.at(4).y = 0.0 * m_Size.y;
+  m_Nodes.at(4).z = 0.5 * m_Size.z;
+
+  m_Nodes.at(5).x = 1.0 * m_Size.x;
+  m_Nodes.at(5).y = 0.0 * m_Size.y;
+  m_Nodes.at(5).z = 0.5 * m_Size.z;
+
+  m_Nodes.at(6).x = 1.0 * m_Size.x;
+  m_Nodes.at(6).y = 1.0 * m_Size.y;
+  m_Nodes.at(6).z = 0.5 * m_Size.z;
+
+  m_Nodes.at(7).x = 0.0 * m_Size.x;
+  m_Nodes.at(7).y = 1.0 * m_Size.y;
+  m_Nodes.at(7).z = 0.5 * m_Size.z;
+
+  m_Nodes.at(8).x = 0.5 * m_Size.x;
+  m_Nodes.at(8).y = 0.0 * m_Size.y;
+  m_Nodes.at(8).z = 1.0 * m_Size.z;
+
+  m_Nodes.at(9).x = 1.0 * m_Size.x;
+  m_Nodes.at(9).y = 0.5 * m_Size.y;
+  m_Nodes.at(9).z = 1.0 * m_Size.z;
+
+  m_Nodes.at(10).x = 0.5 * m_Size.x;
+  m_Nodes.at(10).y = 1.0 * m_Size.y;
+  m_Nodes.at(10).z = 1.0 * m_Size.z;
+
+  m_Nodes.at(11).x = 0.0 * m_Size.x;
+  m_Nodes.at(11).y = 0.5 * m_Size.y;
+  m_Nodes.at(11).z = 1.0 * m_Size.z;
+}
+
+void AddPoints(geometry_msgs::msg::Point* a, geometry_msgs::msg::Point* b) {
+  a->x += b->x;
+  a->y += b->y;
+  a->z += b->z;
+}
+
+void MarchingCubes::SetVertex(const uint32_t i, const uint32_t j, const uint32_t k, const bool value) { m_Vertices.at(i).at(j).at(k) = value; }
+
+void MarchingCubes::SetVertices(const uint32_t i, const uint32_t j, const uint32_t length) {
+  std::fill(m_Vertices.at(i).at(j).begin(), m_Vertices.at(i).at(j).end(), 0);
+  std::fill(m_Vertices.at(i).at(j).begin(), m_Vertices.at(i).at(j).begin() + length, 1);
+}
+
+void MarchingCubes::RebuildCubes() {
+  for (uint32_t i = 0; i < m_Step.x; ++i)
+    for (uint32_t j = 0; j < m_Step.y; ++j)
+      for (uint32_t k = 0; k < m_Step.z; ++k) {
+        // if (!m_UpdateFlag[i][j][k]) continue;
+        // m_UpdateFlag[i][j][k] = 0;
+        m_Cubes.at(i).at(j).at(k) = m_Vertices.at(i + 0).at(j + 0).at(k + 0);
+        m_Cubes.at(i).at(j).at(k) |= m_Vertices.at(i + 1).at(j + 0).at(k + 0) << 1;
+        m_Cubes.at(i).at(j).at(k) |= m_Vertices.at(i + 1).at(j + 1).at(k + 0) << 2;
+        m_Cubes.at(i).at(j).at(k) |= m_Vertices.at(i + 0).at(j + 1).at(k + 0) << 3;
+        m_Cubes.at(i).at(j).at(k) |= m_Vertices.at(i + 0).at(j + 0).at(k + 1) << 4;
+        m_Cubes.at(i).at(j).at(k) |= m_Vertices.at(i + 1).at(j + 0).at(k + 1) << 5;
+        m_Cubes.at(i).at(j).at(k) |= m_Vertices.at(i + 1).at(j + 1).at(k + 1) << 6;
+        m_Cubes.at(i).at(j).at(k) |= m_Vertices.at(i + 0).at(j + 1).at(k + 1) << 7;
+      }
+}
+
+double MarchingCubes::CalculateVolume() {
+  double volume = 0;
+
+  for (auto& r1 : m_Cubes)
+    for (auto& r2 : r1)
+      for (auto& r3 : r2) volume += m_Volumes[r3];
+
+  return volume;
+}
+
+bool MarchingCubes::sideSign(geometry_msgs::msg::Point32* A, geometry_msgs::msg::Point32* B, geometry_msgs::msg::Point32* C,
+                             geometry_msgs::msg::Point32* P) {
+  geometry_msgs::msg::Point32 B_;
+  geometry_msgs::msg::Point32 C_;
+  geometry_msgs::msg::Point32 P_;
+  B_.x = B->x - A->x;
+  B_.y = B->y - A->y;
+  B_.z = B->z - A->z;
+
+  C_.x = C->x - A->x;
+  C_.y = C->y - A->y;
+  C_.z = C->z - A->z;
+
+  P_.x = P->x - A->x;
+  P_.y = P->y - A->y;
+  P_.z = P->z - A->z;
+  // Bx*Cy*Pz - Bx*Cz*Py - By*Cx*Pz + By*Cz*Px + Bz*Cx*Py - Bz*Cy*Px
+  double det = +B_.x * C_.y * P_.z;
+  det += -B_.x * C_.z * P_.y;
+  det += -B_.y * C_.x * P_.z;
+  det += +B_.y * C_.z * P_.x;
+  det += +B_.z * C_.x * P_.y;
+  det += -B_.z * C_.y * P_.x;
+
+  return (det > 0);
+}

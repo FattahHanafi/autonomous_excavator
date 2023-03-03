@@ -1,0 +1,9 @@
+# Request
+sensor_msgs/JointState target
+---
+# Response
+sensor_msgs/JointState misplacement
+---
+# Feedback
+sensor_msgs/JointState current
+

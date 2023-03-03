@@ -1,0 +1,176 @@
+<?xml version="1.0"?>
+
+<robot name="Electrical_Excavator" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:arg name="use_nominal_extrinsics" default="false"/>
+  <xacro:include filename="_d455.urdf.xacro" />
+  <xacro:include filename="_d415.urdf.xacro" />
+  <xacro:include filename="_usb_plug.urdf.xacro" />
+  <xacro:include filename="_materials.urdf.xacro" />
+
+  <link name="world" />
+  <link name="container">
+    <visual>
+      <geometry>
+	  	<mesh filename="package://autonomous_excavator/urdf/meshes/electrical/container.stl" scale="0.001 0.001 0.001" />
+    </geometry>
+      <material name="grey"/>
+    </visual>
+  </link>
+
+  <joint name="container_fix" type="fixed">
+  	<origin xyz="1.200 -0.130 -0.750" rpy="0 0 0" />
+  	<parent link="world"/>
+	  <child link="container"/>
+  </joint>
+  
+  <link name="base">
+    <visual>
+	  <geometry>
+	  	<mesh filename="package://autonomous_excavator/urdf/meshes/electrical/base.stl" scale="0.001 0.001 0.001" />
+	  </geometry>
+      <material name="blue"/>
+    </visual>
+  </link>
+  
+  <joint name="fix" type="fixed">
+  	<parent link="world"/>
+  	<child link="base"/>
+  </joint>
+  
+  <link name="swing">
+    <visual>
+	  <geometry>
+	  	<mesh filename="package://autonomous_excavator/urdf/meshes/electrical/swing.stl" scale="0.001 0.001 0.001" />
+	  </geometry>
+      <material name="yellow"/>
+    </visual>
+  </link>
+  
+  <joint name="Swing" type="continuous">
+    <axis xyz="0.0 0.0 1.0" />
+    <origin xyz="0.2548 0 0.247" rpy="0 0 0" />
+    <parent link="base"/>
+    <child link="swing"/>
+  </joint>
+	 
+  <link name="boom">
+    <visual>
+	  <geometry>
+	  	<mesh filename="package://autonomous_excavator/urdf/meshes/electrical/boom.stl" scale="0.001 0.001 0.001" />
+	  </geometry>
+      <material name="yellow"/>
+    </visual>
+  </link>
+  
+  <joint name="Boom" type="continuous" >
+    <axis xyz="0.0 1.0 .0" />
+	  <origin xyz="0.3445 0 0.063" rpy="0 0 0" />
+    <parent link="swing"/>
+    <child link="boom"/>
+  </joint>
+
+  <link name="arm">
+    <visual>
+	  <geometry>
+	  	<mesh filename="package://autonomous_excavator/urdf/meshes/electrical/arm.stl" scale="0.001 0.001 0.001" />
+	  </geometry>
+      <material name="yellow"/>
+    </visual>
+  </link>
+
+  <joint name="Arm" type="continuous">
+    <axis xyz="0.0 1.0 .0" />
+	  <origin xyz="1.071 0 0" rpy="0 0 0" />
+    <parent link="boom"/>
+    <child link="arm"/>
+  </joint>
+
+  <link name="bucket">
+    <visual>
+	  <geometry>
+	  	<mesh filename="package://autonomous_excavator/urdf/meshes/electrical/bucket.stl" scale="0.001 0.001 0.001" />
+	  </geometry>
+      <material name="yellow"/>
+    </visual>
+  </link>
+
+  <joint name="Bucket" type="continuous">
+    <axis xyz="0.0 1.0 .0" />
+	  <origin xyz="0.560 0.0 0.0" rpy="0 0 0" />
+    <parent link="arm"/>
+    <child link="bucket"/>
+  </joint>
+
+  <link name="cam_bracket">
+    <visual>
+	  <geometry>
+	  	<mesh filename="package://autonomous_excavator/urdf/meshes/electrical/camera_bracket.stl" scale="0.001 0.001 0.001" />
+	  </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+  
+  <joint name="cam_bracket_fix" type="fixed">
+  	<origin xyz="0.270 0 -0.027" rpy="0 0 0" />
+  	<parent link="arm"/>
+	  <child link="cam_bracket"/>
+  </joint>
+  
+  <link name="cam_bucket_bracket" />
+  
+  <joint name="cam_bucket_fix" type="fixed">
+    <origin xyz="0.01014 0 -0.04142" rpy="0 0 0"/>
+  	<parent link="cam_bracket"/>
+	  <child link="cam_bucket_bracket"/>
+  </joint>
+
+  <link name="Camera_Bucket_link" />
+  
+  <joint name="cam_bucket_pose_fix" type="fixed">
+  	<origin xyz="0 0 0" rpy="0 ${25 * pi / 180.0} 0" />
+  	<parent link="cam_bucket_bracket"/>
+	  <child link="Camera_Bucket_link"/>
+  </joint>
+  
+  <xacro:sensor_d415 name="d415" parent="Camera_Bucket_link" use_nominal_extrinsics="$(arg use_nominal_extrinsics)">
+    <origin xyz="0.01018 0 -0.01150" rpy="0 0 0"/>
+  </xacro:sensor_d415>
+
+  <link name="cam_container_bracket" />
+    
+  <joint name="cam_container_fix" type="fixed">
+    <origin xyz="0.06850 0.0225 0.01669" rpy="0 0 0"/>
+  	<parent link="cam_bracket"/>
+	  <child link="cam_container_bracket"/>
+  </joint>
+
+  <link name="cam_container_pose" />
+
+  <joint name="cam_container_pose_fix" type="fixed">
+  	<origin xyz="0 0 0" rpy="0 ${-36 * pi / 180.0} 0" />
+  	<parent link="cam_container_bracket"/>
+	  <child link="cam_container_pose"/>
+  </joint>
+
+  <link name="Camera_Container_link" />
+
+  <joint name="cam_container_pose_fix2" type="fixed">
+    <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" />
+  	<parent link="cam_container_pose"/>
+	  <child link="Camera_Container_link"/>
+  </joint>
+
+
+  <xacro:sensor_d455 name="d455" parent="Camera_Container_link" use_nominal_extrinsics="$(arg use_nominal_extrinsics)">
+    <origin xyz="0.01025 0 ${-0.0290 / 2}" rpy="0 0 0"/>
+  </xacro:sensor_d455>
+
+  <link name="Bucket_container"/>
+
+  <joint name="bucket_container_fix" type="fixed">
+    <origin xyz="0.3 0.3 1.0" rpy="${pi} 0 ${-pi/2}" />
+  	<parent link="d415_depth_optical_frame"/>
+	  <child link="Bucket_container"/>
+  </joint>
+
+</robot>
