@@ -40,7 +40,8 @@ using namespace std::chrono_literals;
 class DepthImagePublisher : public rclcpp::Node {
  public:
   explicit DepthImagePublisher() : Node("camera_reader") {
-    roi_subscriber = this->create_subscription<sensor_msgs::msg::RegionOfInterest>("Camera/ROI", 10, std::bind(&DepthImagePublisher::roi_callback, this, _1));
+    roi_subscriber =
+        this->create_subscription<sensor_msgs::msg::RegionOfInterest>("Camera/ROI", 10, std::bind(&DepthImagePublisher::roi_callback, this, _1));
 
     rgb_publisher = this->create_publisher<sensor_msgs::msg::Image>("Camera/Raw/RGB", 10);
     raw_depth_image_publisher = this->create_publisher<sensor_msgs::msg::Image>("Camera/Raw/Depth", 10);
@@ -207,20 +208,15 @@ class DepthImagePublisher : public rclcpp::Node {
 
     // Declare filters
     m_filters.clear();
-    if (this->get_parameter("decimation_filter").get_parameter_value().get<bool>())
-      m_filters.push_back(m_decFilter);
-    if (this->get_parameter("spatial_filter").get_parameter_value().get<bool>())
-      m_filters.push_back(m_spaFilter);
-    if (this->get_parameter("temporial_filter").get_parameter_value().get<bool>())
-      m_filters.push_back(m_tmpFilter);
+    if (this->get_parameter("decimation_filter").get_parameter_value().get<bool>()) m_filters.push_back(m_decFilter);
+    if (this->get_parameter("spatial_filter").get_parameter_value().get<bool>()) m_filters.push_back(m_spaFilter);
+    if (this->get_parameter("temporial_filter").get_parameter_value().get<bool>()) m_filters.push_back(m_tmpFilter);
     // if
     // (this->get_parameter("hole_filling_filter").get_parameter_value().get<bool>())
     // filters.push_back(hlf_filter);
-    if (this->get_parameter("threshold_filter").get_parameter_value().get<bool>())
-      m_filters.push_back(m_trhFilter);
+    if (this->get_parameter("threshold_filter").get_parameter_value().get<bool>()) m_filters.push_back(m_trhFilter);
 
-    for (auto filter : m_filters)
-      depth_frame = depth_frame.apply_filter(filter);
+    for (auto filter : m_filters) depth_frame = depth_frame.apply_filter(filter);
 
     cv::Mat filtered_depth_data(cv::Size(width, height), CV_16U, (void *)depth_frame.get_data(), cv::Mat::AUTO_STEP);
 
@@ -228,8 +224,7 @@ class DepthImagePublisher : public rclcpp::Node {
 
     filtered_depth_image_publisher->publish(*m_filteredDepthMessage);
 
-    if (!m_roi.width || !m_roi.height)
-      return;
+    if (!m_roi.width || !m_roi.height) return;
 
     uint8_t *data_ptr = (uint8_t *)depth_frame.get_data();
 
@@ -291,7 +286,8 @@ class DepthImagePublisher : public rclcpp::Node {
 
     cv::Mat reconstructed_cropped_filtered_depth_data(cv::Size(width, height), CV_16U, (void *)depth_frame.get_data(), cv::Mat::AUTO_STEP);
 
-    m_reconstructedDepthMessage = cv_bridge::CvImage(m_header, sensor_msgs::image_encodings::TYPE_16UC1, reconstructed_cropped_filtered_depth_data).toImageMsg();
+    m_reconstructedDepthMessage =
+        cv_bridge::CvImage(m_header, sensor_msgs::image_encodings::TYPE_16UC1, reconstructed_cropped_filtered_depth_data).toImageMsg();
 
     reconstructed_cropped_filtered_depth_image_publisher->publish(*m_reconstructedDepthMessage);
 
@@ -341,8 +337,7 @@ class DepthImagePublisher : public rclcpp::Node {
     gsl_vector_set_all(w, 1);
 
     // Assign the x value
-    for (uint32_t i = 0; i < m_roi.width; ++i)
-      gsl_vector_set(x, i, i);
+    for (uint32_t i = 0; i < m_roi.width; ++i) gsl_vector_set(x, i, i);
 
     // use uniform breakpoints on [0, 15]
     gsl_bspline_knots_uniform(0, m_roi.width, bw);

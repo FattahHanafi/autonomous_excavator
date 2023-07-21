@@ -17,6 +17,7 @@
  
   <exec_depend>rclcpp</exec_depend>
   <exec_depend>rclpy</exec_depend>
+  <exec_depend>autonomous_excavator_interfaces</exec_depend>
 
   <member_of_group>rosidl_interface_packages</member_of_group>
 

@@ -3,6 +3,7 @@
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_2_algorithms.h>
 #include <CGAL/Simple_cartesian.h>
+// #include <Eigen/src/Core/util/Constants.h>
 #include <tf2/convert.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
@@ -36,13 +37,9 @@
 #include "../include/MarchingCubes.h"
 #include "../include/Vec3.h"
 
-enum TURN {
-  RIGHT = 0,
-  LEFT = 1,
-  NA
-};
+enum class TURN { RIGHT = 0, LEFT = 1, NA };
 
-enum DIRECTION {
+enum class DIRECTION {
   NORTH = 0,
   SOUTH,
   EAST,
@@ -55,18 +52,18 @@ struct point {
   const double y;
 };
 
-TURN side(const point* a, const point* c, const point* b) {
+TURN side(const point *a, const point *c, const point *b) {
   double dis = (b->x - a->x) * (c->y - a->y) - (b->y - a->y) * (c->x - a->x);
   return (dis < 0) ? TURN::RIGHT : TURN::LEFT;
 };
 
 DIRECTION dir = DIRECTION::EAST;
-TURN q = NA;
+TURN q = TURN::NA;
 
 std::array<int32_t, 9> u;
 std::array<int32_t, 9> v;
 
-double Lookup(const double x, const double y, sensor_msgs::msg::PointCloud2* msg) {
+double Lookup(const double x, const double y, sensor_msgs::msg::PointCloud2 *msg) {
   const point p(x, y);
   bool found = false;
   const int32_t x_span = msg->width;
@@ -85,60 +82,60 @@ double Lookup(const double x, const double y, sensor_msgs::msg::PointCloud2* msg
     z = xyz_it[2];
 
     switch (dir) {
-      case NORTH:
+      case DIRECTION::NORTH:
         if (u.at(0) == 0)
-          q = LEFT;
+          q = TURN::LEFT;
         else if (u[0] == (x_span - 1))
-          q = RIGHT;
+          q = TURN::RIGHT;
         else
           q = side(&p1, &p0, &p);
 
         std::copy(u.cbegin() + 1, u.cend(), u.begin());
         std::copy(v.cbegin() + 1, v.cend(), v.begin());
-        u.at(0) += (q == RIGHT) ? -1 : +1;
-        dir = (q == RIGHT) ? WEST : EAST;
+        u.at(0) += (q == TURN::RIGHT) ? -1 : +1;
+        dir = (q == TURN::RIGHT) ? DIRECTION::WEST : DIRECTION::EAST;
         break;
 
-      case SOUTH:
+      case DIRECTION::SOUTH:
         if (u.at(0) == 0)
-          q = RIGHT;
+          q = TURN::RIGHT;
         else if (u.at(0) == (x_span - 1))
-          q = LEFT;
+          q = TURN::LEFT;
         else
           q = side(&p1, &p0, &p);
 
         std::copy(u.cbegin() + 1, u.cend(), u.begin());
         std::copy(v.cbegin() + 1, v.cend(), v.begin());
-        u.at(0) += (q == RIGHT) ? +1 : -1;
-        dir = (q == RIGHT) ? EAST : WEST;
+        u.at(0) += (q == TURN::RIGHT) ? +1 : -1;
+        dir = (q == TURN::RIGHT) ? DIRECTION::EAST : DIRECTION::WEST;
         break;
 
-      case EAST:
+      case DIRECTION::EAST:
         if (v[0] == 0)
-          q = RIGHT;
+          q = TURN::RIGHT;
         else if (v.at(0) == (y_span - 1))
-          q = LEFT;
+          q = TURN::LEFT;
         else
           q = side(&p1, &p0, &p);
 
         std::copy(u.cbegin() + 1, u.cend(), u.begin());
         std::copy(v.cbegin() + 1, v.cend(), v.begin());
-        v.at(0) += (q == RIGHT) ? +1 : -1;
-        dir = (q == RIGHT) ? NORTH : SOUTH;
+        v.at(0) += (q == TURN::RIGHT) ? +1 : -1;
+        dir = (q == TURN::RIGHT) ? DIRECTION::NORTH : DIRECTION::SOUTH;
         break;
 
-      case WEST:
+      case DIRECTION::WEST:
         if (v.at(0) == 0)
-          q = LEFT;
+          q = TURN::LEFT;
         else if (v.at(0) == (y_span - 1))
-          q = RIGHT;
+          q = TURN::RIGHT;
         else
           q = side(&p1, &p0, &p);
 
         std::copy(u.cbegin() + 1, u.cend(), u.begin());
         std::copy(v.cbegin() + 1, v.cend(), v.begin());
-        v.at(0) += (q == RIGHT) ? -1 : +1;
-        dir = (q == RIGHT) ? SOUTH : NORTH;
+        v.at(0) += (q == TURN::RIGHT) ? -1 : +1;
+        dir = (q == TURN::RIGHT) ? DIRECTION::SOUTH : DIRECTION::NORTH;
         break;
     }
 
@@ -148,7 +145,7 @@ double Lookup(const double x, const double y, sensor_msgs::msg::PointCloud2* msg
   return z;
 }
 
-MarchingCubes* mc(
+MarchingCubes *mc();
 
 typedef double Number_Type;
 typedef CGAL::Simple_cartesian<Number_Type> Kernel;
@@ -188,8 +185,8 @@ class MarchingCubesPublisher : public rclcpp::Node {
     m_marker_message.scale.z = 1;
 
     m_pc_rotated_message.header.frame_id = "container";
-    pc_subscriber = this->create_subscription<sensor_msgs::msg::PointCloud2>("Camera/PointCloud", 10,
-                                                                             std::bind(&MarchingCubesPublisher::pc_callback, this, _1));
+    pc_subscriber =
+        this->create_subscription<sensor_msgs::msg::PointCloud2>("Camera/PointCloud", 10, std::bind(&MarchingCubesPublisher::pc_callback, this, _1));
 
     rotated_pc_publisher = this->create_publisher<sensor_msgs::msg::PointCloud2>("Camera/RotatedPointCloud", 10);
     blade_subscriber =
@@ -316,16 +313,14 @@ class MarchingCubesPublisher : public rclcpp::Node {
       }
     }
 
-    std::mdspan
-        end = std::chrono::steady_clock::now();
+    std::mdspan end = std::chrono::steady_clock::now();
     RCLCPP_INFO(this->get_logger(), "Generating took %lu ms", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
 
     start = std::chrono::steady_clock::now();
     mc.RebuildCubes();
     Publish();
     end = std::chrono::steady_clock::now();
-    RCLCPP_INFO(this->get_logger(), "Rebuild and Publish took %lu ms",
-                std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+    RCLCPP_INFO(this->get_logger(), "Rebuild and Publish took %lu ms", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
   }
 
   void blade_callback(const geometry_msgs::msg::Polygon::SharedPtr msg) {
@@ -396,7 +391,7 @@ class MarchingCubesPublisher : public rclcpp::Node {
   std::shared_ptr<tf2_ros::TransformListener> tf_listener{nullptr};
 };
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   u.at(0) = 1;
   mc.RebuildCubes();
   rclcpp::init(argc, argv);

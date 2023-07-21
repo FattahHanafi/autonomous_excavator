@@ -15,7 +15,8 @@ using std::placeholders::_1;
 class FramePublisher : public rclcpp::Node {
  public:
   explicit FramePublisher() : Node("excavator_tf2_broadcaster") {
-    joint_subscription = this->create_subscription<sensor_msgs::msg::JointState>("joint_states", 10, std::bind(&FramePublisher::make_transforms, this, _1));
+    joint_subscription =
+        this->create_subscription<sensor_msgs::msg::JointState>("joint_states", 10, std::bind(&FramePublisher::make_transforms, this, _1));
     tf_publisher = std::make_shared<tf2_ros::StaticTransformBroadcaster>(this);
   }
 
@@ -27,9 +28,9 @@ class FramePublisher : public rclcpp::Node {
     m_TransformStamped.header.frame_id = "world";
     m_TransformStamped.child_frame_id = "base";
 
-    m_TransformStamped.transform.translation.x = 2.0;
+    m_TransformStamped.transform.translation.x = 0.0;
     m_TransformStamped.transform.translation.y = 0.0;
-    m_TransformStamped.transform.translation.z = 1.0;
+    m_TransformStamped.transform.translation.z = 0.0;
     m_Quaternion.setRPY(0, 0, 0);
     m_TransformStamped.transform.rotation.x = m_Quaternion.x();
     m_TransformStamped.transform.rotation.y = m_Quaternion.y();
@@ -41,9 +42,6 @@ class FramePublisher : public rclcpp::Node {
     m_TransformStamped.header.frame_id = "base";
     m_TransformStamped.child_frame_id = "swing";
 
-    m_TransformStamped.transform.translation.x = 0.0;
-    m_TransformStamped.transform.translation.y = 0.0;
-    m_TransformStamped.transform.translation.z = 0.0;
     m_Quaternion.setRotation(tf2::Vector3(0, 0, 1), msg->position[0]);
     m_TransformStamped.transform.rotation.x = m_Quaternion.x();
     m_TransformStamped.transform.rotation.y = m_Quaternion.y();
@@ -54,9 +52,6 @@ class FramePublisher : public rclcpp::Node {
 
     m_TransformStamped.header.frame_id = "swing";
     m_TransformStamped.child_frame_id = "boom";
-    m_TransformStamped.transform.translation.x = 0.0;
-    m_TransformStamped.transform.translation.y = 0.0;
-    m_TransformStamped.transform.translation.z = 0.0;
     m_Quaternion.setRotation(tf2::Vector3(0, 1, 0), msg->position[1]);
     m_TransformStamped.transform.rotation.x = m_Quaternion.x();
     m_TransformStamped.transform.rotation.y = m_Quaternion.y();
@@ -67,9 +62,6 @@ class FramePublisher : public rclcpp::Node {
 
     m_TransformStamped.header.frame_id = "boom";
     m_TransformStamped.child_frame_id = "arm";
-    m_TransformStamped.transform.translation.x = 1.5;
-    m_TransformStamped.transform.translation.y = 0.0;
-    m_TransformStamped.transform.translation.z = 0.0;
     m_Quaternion.setRotation(tf2::Vector3(0, 1, 0), msg->position[2]);
     m_TransformStamped.transform.rotation.x = m_Quaternion.x();
     m_TransformStamped.transform.rotation.y = m_Quaternion.y();
@@ -78,22 +70,8 @@ class FramePublisher : public rclcpp::Node {
 
     tf_publisher->sendTransform(m_TransformStamped);
 
-    m_TransformStamped.child_frame_id = "camera";
-    m_TransformStamped.transform.translation.x = 0.5;
-    m_TransformStamped.transform.translation.y = 0.0;
-    m_TransformStamped.transform.translation.z = 0.0;
-    m_Quaternion.setRPY(0, M_PI_2 + M_PI / 6.0, 0);
-    m_TransformStamped.transform.rotation.x = m_Quaternion.x();
-    m_TransformStamped.transform.rotation.y = m_Quaternion.y();
-    m_TransformStamped.transform.rotation.z = m_Quaternion.z();
-    m_TransformStamped.transform.rotation.w = m_Quaternion.w();
-    tf_publisher->sendTransform(m_TransformStamped);
-
     m_TransformStamped.header.frame_id = "arm";
     m_TransformStamped.child_frame_id = "bucket";
-    m_TransformStamped.transform.translation.x = 1.0;
-    m_TransformStamped.transform.translation.y = 0.0;
-    m_TransformStamped.transform.translation.z = 0.0;
     m_Quaternion.setRotation(tf2::Vector3(0, 1, 0), msg->position[3]);
     m_TransformStamped.transform.rotation.x = m_Quaternion.x();
     m_TransformStamped.transform.rotation.y = m_Quaternion.y();
@@ -101,21 +79,7 @@ class FramePublisher : public rclcpp::Node {
     m_TransformStamped.transform.rotation.w = m_Quaternion.w();
 
     tf_publisher->sendTransform(m_TransformStamped);
-
-    m_TransformStamped.header.frame_id = "bucket";
-    m_TransformStamped.child_frame_id = "teeth";
-    m_TransformStamped.transform.translation.x = 0.5;
-    m_TransformStamped.transform.translation.y = 0.0;
-    m_TransformStamped.transform.translation.z = 0.0;
-    m_Quaternion.setRotation(tf2::Vector3(0, 0, 1), 0);
-    m_TransformStamped.transform.rotation.x = m_Quaternion.x();
-    m_TransformStamped.transform.rotation.y = m_Quaternion.y();
-    m_TransformStamped.transform.rotation.z = m_Quaternion.z();
-    m_TransformStamped.transform.rotation.w = m_Quaternion.w();
-
-    tf_publisher->sendTransform(m_TransformStamped);
   }
-
   geometry_msgs::msg::TransformStamped m_TransformStamped;
   tf2::Quaternion m_Quaternion;
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_subscription;

@@ -1,7 +1,8 @@
+#include <math.h>
+
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 
-#define M_PI 3.14159265358979323846
 #define m 2
 #define toRad M_PI / 180.0
 #define theta1 52.13 * toRad
@@ -32,8 +33,8 @@ using std::placeholders::_1;
 class JointStatePiblisher : public rclcpp::Node {
  public:
   JointStatePiblisher() : Node("joint_state_publisher") {
-    stroke_subscriber = this->create_subscription<sensor_msgs::msg::JointState>(
-        "Machine/ActuatorStroke/Feedback", 10, std::bind(&JointStatePiblisher::StrokeFeedbackCallback, this, _1));
+    stroke_subscriber = this->create_subscription<sensor_msgs::msg::JointState>("Machine/ActuatorStroke/Feedback", 10,
+                                                                                std::bind(&JointStatePiblisher::StrokeFeedbackCallback, this, _1));
     joint_angle_publisher = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
     joint_angle_message.name.resize(4);
     joint_angle_message.position.resize(4, 0.0f);
@@ -74,20 +75,15 @@ class JointStatePiblisher : public rclcpp::Node {
     double theta17 = theta15 + theta16;
     double theta18 = M_PI - theta17;
     double q3 = theta19 - theta18;
-    // double c = sqrt(LL2 * LL2 + LL3 * LL3 - 2 * LL2 * LL3 * cos(M_PI - q3));
-    // double theta20 = acos((LL2 * LL2 + c * c - LL3 * LL3) / (2 * LL2 * c));
-    // double theta21 = M_PI - theta20 - q2;
-    // double REP = sqrt(LL1 * LL1 + c * c - 2 * LL1 * c * cos(theta21));
-    // double theta22 = acos((REP * REP + LL1 * LL1 - c * c) / (2 * LL1 * REP));
-    // double theta23 = q1 - theta22;
-    // double EPX = REP * cos(theta23);
-    // double EPZ = REP * sin(theta23);
-    // double Theta_end = q1 - q2 - q3;
 
-    joint_angle_message.position.at(0) = S0;
-    joint_angle_message.position.at(1) = -q1;  // * -q1;
-    joint_angle_message.position.at(2) = q2;   // q2;  // * 0.3 + 0.2 * std::sin(2 * now.seconds());
-    joint_angle_message.position.at(3) = q3;   //  + theta19 - M_PI / 2.0 ;// q3;     // * 0.5 + 0.2 * std::sin(2 * now.seconds());
+    // joint_angle_message.position.at(0) = S0;
+    // joint_angle_message.position.at(1) = -q1;
+    // joint_angle_message.position.at(2) = q2;
+    // joint_angle_message.position.at(3) = q3;
+    joint_angle_message.position.at(0) = 0.0;
+    joint_angle_message.position.at(1) = 0.0;
+    joint_angle_message.position.at(2) = 0.0;
+    joint_angle_message.position.at(3) = 0.0;
     joint_angle_message.header.stamp = this->get_clock()->now();
     joint_angle_publisher->publish(joint_angle_message);
   }
@@ -98,7 +94,7 @@ class JointStatePiblisher : public rclcpp::Node {
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_angle_publisher;
 };
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<JointStatePiblisher>());
   rclcpp::shutdown();

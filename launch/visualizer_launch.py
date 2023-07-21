@@ -3,7 +3,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch_ros.actions import Node
 import os.path
 
-urdf_file_name = 'electrical_excavator.urdf'
+urdf_file_name = 'hydraulic_excavator.urdf'
 rviz_file_name = 'machine_visualizer.rviz'
 
 urdf = os.path.join(get_package_share_directory('autonomous_excavator'), 'urdf', urdf_file_name)
@@ -16,19 +16,7 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='autonomous_excavator',
-            executable='serial_interface'),
-        Node(
-            package='autonomous_excavator',
             executable='joint_publisher'),
-        Node(
-            package='autonomous_excavator',
-            executable='blade_node'),
-        Node(
-            package='autonomous_excavator',
-            executable='merged'),
-        Node(
-            package='autonomous_excavator',
-            executable='surface_reconstructor'),
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',

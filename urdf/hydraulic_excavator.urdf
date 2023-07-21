@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<robot name="Machine">
+
+  <material name="blue">
+    <color rgba="0 0 0.8 1"/>
+  </material>
+
+  <material name="white">
+    <color rgba="1 1 1 1"/>
+  </material>
+
+  <material name="yellow">
+    <color rgba="1 1 0 1"/>
+  </material>
+
+  <material name="grey">
+    <color rgba="0.66 0.66 0.66 1"/>
+  </material>
+
+  <link name="world"/>
+  
+  <link name="base">
+    <visual>
+	  <geometry>
+	  	<mesh filename="package://autonomous_excavator/urdf/meshes/hydraulic/Base.STL" scale="0.001 0.001 0.001" />
+	  </geometry>
+      <material name="blue"/>
+    </visual>
+  </link>
+  
+  <link name="swing">
+  </link>
+  
+  <link name="boom">
+    <visual>
+	  <geometry>
+	  	<mesh filename="package://autonomous_excavator/urdf/meshes/hydraulic/Boom.STL" scale="0.001 0.001 0.001" />
+	  </geometry>
+      <material name="yellow"/>
+    </visual>
+  </link>
+
+  <link name="arm">
+    <visual>
+	  <geometry>
+	  	<mesh filename="package://autonomous_excavator/urdf/meshes/hydraulic/Arm.STL" scale="0.001 0.001 0.001" />
+	  </geometry>
+      <material name="yellow"/>
+    </visual>
+  </link>
+
+  <link name="bucket">
+    <visual>
+	  <geometry>
+	  	<mesh filename="package://autonomous_excavator/urdf/meshes/hydraulic/Bucket.STL" scale="0.001 0.001 0.001" />
+	  </geometry>
+      <material name="yellow"/>
+    </visual>
+  </link>
+
+  <joint name="fix" type="fixed">
+    <origin xyz="0 0 0.4" rpy="0 0 0" />
+  	<parent link="world"/>
+  	<child link="base"/>
+  </joint>
+  
+  <joint name="Swing" type="continuous">
+    <axis xyz="0.0 0.0 1.0" />
+    <parent link="base"/>
+    <child link="swing"/>
+  </joint>
+
+  <joint name="Boom" type="continuous" >
+    <axis xyz="0.0 1.0 .0" />
+    <origin xyz="0.2548 0 0.247" rpy="0 0 0" />
+    <parent link="swing"/>
+    <child link="boom"/>
+  </joint>
+
+  <joint name="Arm" type="continuous">
+    <axis xyz="0.0 1.0 .0" />
+	<origin xyz="0.503 0 1.381" rpy="0 0 0" />
+    <parent link="boom"/>
+    <child link="arm"/>
+  </joint>
+
+  <joint name="Bucket" type="continuous">
+    <axis xyz="0.0 1.0 .0" />
+	<origin xyz="0.880 0 0" rpy="0 0 0" />
+    <parent link="arm"/>
+    <child link="bucket"/>
+  </joint>
+
+</robot>
