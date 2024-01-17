@@ -8,19 +8,23 @@ endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_BUILD_TYPE Release)
 
+include_directories(include ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(Boost REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 # uncomment the following section in order to fill in further dependencies
 # manually. find_package(<dependency> REQUIRED)
 
-add_executable(marching_cube_engine src/marching_cube_engine.cpp)
+add_executable(marching_cube_engine src/marching_cube_engine.cpp
+                                    include/MarchingCubes.cpp)
 target_include_directories(
   marching_cube_engine
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(marching_cube_engine rclcpp std_msgs)
+ament_target_dependencies(marching_cube_engine rclcpp std_msgs Boost)
 
 install(TARGETS marching_cube_engine DESTINATION lib/${PROJECT_NAME})
 
